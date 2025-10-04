@@ -188,6 +188,10 @@ st.markdown(
     - **Tabular Model Analysis**: Input stellar and transit parameters or CSV file to get a prediction from a powerful XGBoost model.
     - **FITS Viewer**: A utility to inspect the contents of any FITS file.
     - **Admin Tools**: A protected area for managing the AI models.
+
+    -Made by
+        Mugeshkumar S
+        GuruKasi M
     """
 )
 
@@ -205,4 +209,5 @@ while True:
     <p class="live-clock">{julian_date}</p>
     """, unsafe_allow_html=True)
     
+
     time.sleep(1)
