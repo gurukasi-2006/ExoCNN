@@ -232,7 +232,7 @@ elif page == "⚙️ Admin & Model Management":
         st.warning("This section is restricted. Please enter the password to unlock.")
         password = st.text_input("Admin Password", type="password", key="lc_admin_password")
         if st.button("Unlock"):
-            if password == "9112001":
+            if password == "2030":
                 st.session_state.authenticated = True; st.rerun()
             else:
                 st.error("Incorrect password.")
@@ -270,4 +270,5 @@ elif page == "⚙️ Admin & Model Management":
         if st.button("Lock Admin Mode"):
             st.session_state.authenticated = False
             st.rerun()
+
             
