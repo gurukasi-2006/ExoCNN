@@ -1,0 +1,13 @@
+streamlit
+astroquery
+pandas
+astropy
+torch
+lightkurve
+matplotlib
+plotly
+plotly-express
+joblib
+shap
+xgboost
+scikit-learn
