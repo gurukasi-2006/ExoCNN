@@ -189,8 +189,8 @@ st.markdown(
     - **FITS Viewer**: A utility to inspect the contents of any FITS file.
     - **Admin Tools**: A protected area for managing the AI models.
 
-    -Made by
-        Mugeshkumar S
+    -Made by-
+        Mugeshkumar S,
         GuruKasi M
     """
 )
@@ -211,3 +211,4 @@ while True:
     
 
     time.sleep(1)
+
