@@ -383,7 +383,7 @@ st.sidebar.markdown(
     """
     <div style="text-align: center; color: #E0E0E0; font-family: 'Roboto Mono', monospace;">
         Created by<br>
-        <strong>S Mugeshkumar,M Gurukasi</strong>
+        <strong>Mugeshkumar S,Gurukasi M</strong>
     </div>
     """,
     unsafe_allow_html=True
@@ -802,3 +802,4 @@ while True:
     """, unsafe_allow_html=True)
     
     time.sleep(1)
+
