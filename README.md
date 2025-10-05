@@ -23,4 +23,5 @@ Used Astroquery,MAST,Exofop for Lightcurve FITS Files
 Used NASA KOI,K2 and TESS datasets and Lightcurve FITS Files for training
 
 Repository and Website Created on 04-10-2025
+
 Coauthored by M.Gurukasi And S.Mugeshkumar.
