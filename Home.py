@@ -5,6 +5,7 @@ import time
 from astropy.time import Time
 import base64
 import os
+import streamlit.components.v1 as components
 
 # --- Page Configuration ---
 st.set_page_config(
@@ -15,18 +16,35 @@ st.set_page_config(
 
 # --- Function to encode image to base64 ---
 def get_image_as_base64(path):
+    """Gets the base64 string of an image file."""
     if not os.path.exists(path):
         return None
     with open(path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode()
 
 # --- Enhanced Styling and Fonts (ALL CSS IS NOW CONSOLIDATED HERE) ---
+# --- Enhanced Styling and Fonts (ALL CSS IS NOW CONSOLIDATED HERE) ---
 def load_custom_styling():
     """Injects all custom CSS for the entire page in one block."""
+    # Encode the local sidebar background to base64
+    sidebar_bg_path = "sidebar_background.jpg"
+    sidebar_bg_base64 = get_image_as_base64(sidebar_bg_path)
+
     st.markdown(f"""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Roboto+Mono:wght@400;700&display=swap');
 
+        /* --- Sidebar Styling --- */
+        [data-testid="stSidebar"] > div:first-child {{
+            background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url("data:image/jpeg;base64,{sidebar_bg_base64}");
+            background-position: center; 
+            background-repeat: no-repeat;
+            background-size: cover;
+        }}
+        [data-testid="stSidebar"] {{
+            border-right: 1px solid #2a3e5f;
+        }}
+        
         /* --- General Background & App Styling --- */
         .stApp {{
             background: linear-gradient(180deg, #000428 0%, #000000 70%);
@@ -48,11 +66,11 @@ def load_custom_styling():
             animation: fadeIn 2.5s ease-in-out;
         }}
 
-        /* --- Styling for Live Data (Clocks and Counter) - FONT SIZE CORRECTED --- */
+        /* --- Styling for Live Data (Clocks and Counter) --- */
         .live-clock {{
             font-family: 'Roboto Mono', monospace;
             color: #E6E6FA;
-            font-size: 8.2rem;  /* <-- CORRECTED LARGE FONT SIZE */
+            font-size: 8.2rem;
             font-weight: 700;
             text-shadow: 0 0 8px #ADD8E6;
             padding: 10px;
@@ -67,7 +85,7 @@ def load_custom_styling():
         }}
         .clock-label {{
             font-family: 'Roboto Mono', monospace;
-            font-size: 4rem;  /* <-- CORRECTED LARGE FONT SIZE */
+            font-size: 4rem;
             color: #87CEEB;
             text-align: center;
         }}
@@ -153,9 +171,93 @@ def load_custom_styling():
         #layer-3 {{ animation-delay: 3.5s; }}
         #arrow-3 {{ animation-delay: 4.5s; }}
         #layer-4 {{ animation-delay: 5.0s; }}
+
+        /* --- REBUILT: Transit Animation Styles --- */
+        .transit-container {{
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 30px;
+            background-color: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 15px;
+            font-family: 'Roboto Mono', monospace;
+            color: #c9d1d9;
+        }}
+        .scene {{
+            position: relative;
+            height: 100px;
+            display: flex;
+            align-items: center;
+        }}
+        .star {{
+            width: 80px;
+            height: 80px;
+            background-color: #f0e68c;
+            border-radius: 50%;
+            box-shadow: 0 0 25px #f0e68c;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }}
+        .planet {{
+            width: 15px;
+            height: 15px;
+            background-color: #6cb6ff;
+            border-radius: 50%;
+            position: absolute;
+            animation: transit-pass 8s linear infinite;
+        }}
+        .orbit-path {{
+            position: absolute;
+            width: 100%;
+            border-top: 1px dashed rgba(255, 255, 255, 0.2);
+        }}
+        .light-curve-graph {{
+            position: relative;
+            height: 120px;
+            width: 100%;
+            border-left: 1px solid #8b949e;
+            border-bottom: 1px solid #8b949e;
+            margin-top: 40px;
+        }}
+        .curve-path {{
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            clip-path: path('M 0 10 L 210 10 C 245 10, 245 80, 280 80 L 420 80 C 455 80, 455 10, 490 10 L 700 10');
+            overflow: hidden;
+        }}
+        .curve-path::after {{
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #58a6ff;
+            transform: translateX(-100%);
+            animation: draw-line 8s linear infinite;
+        }}
+        .graph-labels span {{
+            position: absolute;
+            color: #8b949e;
+            font-size: 0.8rem;
+        }}
+        .label-time {{ bottom: -25px; left: 45%; }}
+        .label-brightness {{ bottom: 45%; left: -60px; transform: rotate(-90deg); }}
+
+        @keyframes transit-pass {{
+            0%   {{ left: 0%; }}
+            100% {{ left: 100%; }}
+        }}
+        @keyframes draw-line {{
+            0%   {{ transform: translateX(-100%); }}
+            100% {{ transform: translateX(0%); }}
+        }}
     </style>
     """, unsafe_allow_html=True)
-
 
 # --- tsParticles Animated Background ---
 def animated_background():
@@ -218,11 +320,11 @@ def animated_background():
     """, height=0)
 
 
-# --- Live Data Fetching Functions (Unchanged) ---
+# --- Live Data Fetching Functions Non Live ---
 @st.cache_data(ttl=3600)
 def get_live_exoplanet_count():
     try:
-        count = NasaExoplanetArchive.query_criteria(table="ps", select="count(pl_name)")[0][0]
+        count = 6022
         return count
     except Exception:
         return 5641
@@ -239,7 +341,7 @@ load_custom_styling()
 animated_background()
 
 # --- Logo and Title Display ---
-logo_path = "exohunters_logo.png"
+logo_path = "exohunters_logo.png" # Corrected path
 logo_base64 = get_image_as_base64(logo_path)
 
 if logo_base64:
@@ -276,6 +378,354 @@ with col3:
     jd_placeholder = st.empty()
 
 st.markdown("---")
+st.sidebar.markdown("---")
+st.sidebar.markdown(
+    """
+    <div style="text-align: center; color: #E0E0E0; font-family: 'Roboto Mono', monospace;">
+        Created by<br>
+        <strong>S Mugeshkumar,M Gurukasi</strong>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+# --- TRANSIT ANIMATION ---
+st.header("The Transit Method: A Visual Explanation")
+st.components.v1.html("""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: transparent;
+            font-family: 'Roboto Mono', monospace;
+            color: #E6E6FA;
+        }
+
+        .animation-container {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .star-animation {
+            flex: 1;
+            min-width: 400px;
+            background: rgba(10, 20, 40, 0.5);
+            border: 2px solid #4a90e2;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 0 25px rgba(74, 144, 226, 0.3);
+        }
+
+        .graph-container {
+            flex: 1;
+            min-width: 400px;
+            background: rgba(10, 20, 40, 0.5);
+            border: 2px solid #4a90e2;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 0 25px rgba(74, 144, 226, 0.3);
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+
+        .controls {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        button {
+            background: #4a90e2;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+            font-family: 'Roboto Mono', monospace;
+            box-shadow: 0 0 15px rgba(74, 144, 226, 0.4);
+        }
+
+        button:hover {
+            background: #5ba0f2;
+            box-shadow: 0 0 25px rgba(74, 144, 226, 0.6);
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .info {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(74, 144, 226, 0.1);
+            border-radius: 10px;
+            border: 1px solid #4a90e2;
+        }
+
+        .label {
+            text-align: center;
+            font-size: 18px;
+            color: #87CEEB;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="animation-container">
+        <div class="star-animation">
+            <div class="label">Star & Planet System</div>
+            <canvas id="starCanvas" width="500" height="300"></canvas>
+        </div>
+        
+        <div class="graph-container">
+            <div class="label">Brightness vs Time (Light Curve)</div>
+            <canvas id="graphCanvas" width="500" height="300"></canvas>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button id="playPause">⏸ Pause</button>
+        <button id="reset">🔄 Reset</button>
+    </div>
+
+    <div class="info">
+        <strong>What you're seeing:</strong> As the planet crosses in front of the star (transit), 
+        it blocks some light, causing a dip in brightness on the graph. 
+        This repeating pattern is how we detect exoplanets!
+    </div>
+
+    <script>
+        const starCanvas = document.getElementById('starCanvas');
+        const graphCanvas = document.getElementById('graphCanvas');
+        const starCtx = starCanvas.getContext('2d');
+        const graphCtx = graphCanvas.getContext('2d');
+        
+        let animationId;
+        let isPlaying = true;
+        let time = 0;
+        const dataPoints = [];
+        const maxDataPoints = 200;
+        
+        const star = {
+            x: starCanvas.width / 2,
+            y: starCanvas.height / 2,
+            radius: 60
+        };
+        
+        const planet = {
+            radius: 15,
+            orbitRadius: 200,
+            speed: 0.015,
+            angle: -Math.PI
+        };
+        
+        const graphPadding = 40;
+        const graphWidth = graphCanvas.width - 2 * graphPadding;
+        const graphHeight = graphCanvas.height - 2 * graphPadding;
+        
+        function drawStar() {
+            const gradient = starCtx.createRadialGradient(star.x, star.y, 0, star.x, star.y, star.radius * 1.5);
+            gradient.addColorStop(0, 'rgba(255, 220, 100, 0.8)');
+            gradient.addColorStop(0.5, 'rgba(255, 200, 50, 0.4)');
+            gradient.addColorStop(1, 'rgba(255, 180, 0, 0)');
+            
+            starCtx.fillStyle = gradient;
+            starCtx.beginPath();
+            starCtx.arc(star.x, star.y, star.radius * 1.5, 0, Math.PI * 2);
+            starCtx.fill();
+            
+            starCtx.fillStyle = '#FFD700';
+            starCtx.beginPath();
+            starCtx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+            starCtx.fill();
+            
+            starCtx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            starCtx.beginPath();
+            starCtx.arc(star.x - 15, star.y - 15, 12, 0, Math.PI * 2);
+            starCtx.fill();
+        }
+        
+        function drawPlanet(x, y) {
+            starCtx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            starCtx.beginPath();
+            starCtx.arc(x + 2, y + 2, planet.radius, 0, Math.PI * 2);
+            starCtx.fill();
+            
+            const gradient = starCtx.createRadialGradient(x - 5, y - 5, 0, x, y, planet.radius);
+            gradient.addColorStop(0, '#6B8EC7');
+            gradient.addColorStop(1, '#2E5090');
+            
+            starCtx.fillStyle = gradient;
+            starCtx.beginPath();
+            starCtx.arc(x, y, planet.radius, 0, Math.PI * 2);
+            starCtx.fill();
+            
+            starCtx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+            starCtx.beginPath();
+            starCtx.arc(x - 5, y - 5, 4, 0, Math.PI * 2);
+            starCtx.fill();
+        }
+        
+        function drawOrbitPath() {
+            starCtx.strokeStyle = 'rgba(135, 206, 235, 0.2)';
+            starCtx.lineWidth = 1;
+            starCtx.setLineDash([5, 5]);
+            starCtx.beginPath();
+            starCtx.moveTo(star.x - planet.orbitRadius, star.y);
+            starCtx.lineTo(star.x + planet.orbitRadius, star.y);
+            starCtx.stroke();
+            starCtx.setLineDash([]);
+        }
+        
+        function calculateBrightness(planetX, planetY) {
+            const distance = Math.sqrt(Math.pow(planetX - star.x, 2) + Math.pow(planetY - star.y, 2));
+            
+            if (distance < star.radius) {
+                const overlap = (star.radius - distance) / star.radius;
+                const blockage = (planet.radius * planet.radius) / (star.radius * star.radius);
+                return 1 - (blockage * Math.max(0, overlap * 1.5));
+            }
+            
+            return 1.0;
+        }
+        
+        function drawGraph() {
+            graphCtx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            graphCtx.fillRect(0, 0, graphCanvas.width, graphCanvas.height);
+            
+            graphCtx.strokeStyle = '#87CEEB';
+            graphCtx.lineWidth = 2;
+            
+            graphCtx.beginPath();
+            graphCtx.moveTo(graphPadding, graphPadding);
+            graphCtx.lineTo(graphPadding, graphCanvas.height - graphPadding);
+            graphCtx.stroke();
+            
+            graphCtx.beginPath();
+            graphCtx.moveTo(graphPadding, graphCanvas.height - graphPadding);
+            graphCtx.lineTo(graphCanvas.width - graphPadding, graphCanvas.height - graphPadding);
+            graphCtx.stroke();
+            
+            graphCtx.fillStyle = '#E6E6FA';
+            graphCtx.font = '12px Roboto Mono';
+            graphCtx.textAlign = 'center';
+            graphCtx.fillText('Time →', graphCanvas.width / 2, graphCanvas.height - 10);
+            
+            graphCtx.save();
+            graphCtx.translate(15, graphCanvas.height / 2);
+            graphCtx.rotate(-Math.PI / 2);
+            graphCtx.fillText('Brightness →', 0, 0);
+            graphCtx.restore();
+            
+            graphCtx.strokeStyle = 'rgba(135, 206, 235, 0.3)';
+            graphCtx.lineWidth = 1;
+            graphCtx.setLineDash([3, 3]);
+            graphCtx.beginPath();
+            graphCtx.moveTo(graphPadding, graphPadding + 20);
+            graphCtx.lineTo(graphCanvas.width - graphPadding, graphPadding + 20);
+            graphCtx.stroke();
+            graphCtx.setLineDash([]);
+            
+            if (dataPoints.length > 1) {
+                graphCtx.strokeStyle = '#4a90e2';
+                graphCtx.lineWidth = 2;
+                graphCtx.beginPath();
+                
+                dataPoints.forEach((point, index) => {
+                    const x = graphPadding + (index / maxDataPoints) * graphWidth;
+                    const y = graphCanvas.height - graphPadding - (point * graphHeight * 0.8);
+                    
+                    if (index === 0) {
+                        graphCtx.moveTo(x, y);
+                    } else {
+                        graphCtx.lineTo(x, y);
+                    }
+                });
+                
+                graphCtx.stroke();
+                
+                const lastPoint = dataPoints[dataPoints.length - 1];
+                const lastX = graphPadding + ((dataPoints.length - 1) / maxDataPoints) * graphWidth;
+                const lastY = graphCanvas.height - graphPadding - (lastPoint * graphHeight * 0.8);
+                
+                graphCtx.fillStyle = '#FFD700';
+                graphCtx.beginPath();
+                graphCtx.arc(lastX, lastY, 4, 0, Math.PI * 2);
+                graphCtx.fill();
+            }
+        }
+        
+        function animate() {
+            if (!isPlaying) return;
+            
+            planet.angle += planet.speed;
+            if (planet.angle > Math.PI) {
+                planet.angle = -Math.PI;
+            }
+            
+            const planetX = star.x + Math.cos(planet.angle) * planet.orbitRadius;
+            const planetY = star.y;
+            
+            starCtx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            starCtx.fillRect(0, 0, starCanvas.width, starCanvas.height);
+            
+            drawOrbitPath();
+            drawStar();
+            drawPlanet(planetX, planetY);
+            
+            const brightness = calculateBrightness(planetX, planetY);
+            dataPoints.push(brightness);
+            
+            if (dataPoints.length > maxDataPoints) {
+                dataPoints.shift();
+            }
+            
+            drawGraph();
+            
+            time++;
+            animationId = requestAnimationFrame(animate);
+        }
+        
+        document.getElementById('playPause').addEventListener('click', function() {
+            isPlaying = !isPlaying;
+            this.textContent = isPlaying ? '⏸ Pause' : '▶ Play';
+            if (isPlaying) {
+                animate();
+            }
+        });
+        
+        document.getElementById('reset').addEventListener('click', function() {
+            planet.angle = -Math.PI;
+            time = 0;
+            dataPoints.length = 0;
+            starCtx.clearRect(0, 0, starCanvas.width, starCanvas.height);
+            graphCtx.clearRect(0, 0, graphCanvas.width, graphCanvas.height);
+            drawGraph();
+        });
+        
+        animate();
+    </script>
+</body>
+</html>
+""", height=650)
+st.markdown("---")
+
 
 st.header("About This Application")
 st.markdown(
@@ -284,26 +734,26 @@ st.markdown(
     exoplanets from astrophysical data. Use the navigation sidebar to access the analysis tools.
 
     ### Period (The Rhythm):
-    - **What it is:** How often the light dims.
-    - **Why it matters:** A real planet has a perfect, repeating rhythm. If the light dims exactly every 3 days, it's a good sign. If the timing is random, it's not a planet.
+    - *What it is:* How often the light dims.
+    - *Why it matters:* A real planet has a perfect, repeating rhythm. If the light dims exactly every 3 days, it's a good sign. If the timing is random, it's not a planet.
     ### Duration (The Crossing Time):
-    - **What it is:** How long the light stays dim each time.
-    - **Why it matters:** The time it takes for the bug to cross the light bulb tells us how fast it's moving. A dip that's too quick is likely just a glitch.
+    - *What it is:* How long the light stays dim each time.
+    - *Why it matters:* The time it takes for the bug to cross the light bulb tells us how fast it's moving. A dip that's too quick is likely just a glitch.
     ### Depth (The Dimness):
-    - **What it is:** How much the light dims.
-    - **Why it matters:** This tells you the size of the object. A tiny bug (a planet) will only make the light a tiny bit dimmer. If the light gets very dim, the object was probably another massive light bulb (another star), not a planet.
+    - *What it is:* How much the light dims.
+    - *Why it matters:* This tells you the size of the object. A tiny bug (a planet) will only make the light a tiny bit dimmer. If the light gets very dim, the object was probably another massive light bulb (another star), not a planet.
     ### Signal-to-Noise Ratio / SNR (The Clarity):
-    - **What it is:** How clear and obvious the dimming is.
-    - **Why it matters:** A sharp, clear dip is a believable signal (High SNR). A fuzzy, faint dip that's hard to see against the background flicker is probably not real (Low SNR).
+    - *What it is:* How clear and obvious the dimming is.
+    - *Why it matters:* A sharp, clear dip is a believable signal (High SNR). A fuzzy, faint dip that's hard to see against the background flicker is probably not real (Low SNR).
     ### Stellar Parameters (Info about the Star):
-    - **What they are:** Knowing details about the star itself (Is it big? Is it hot?).
-    - **Why they matter:**  If you know you're looking at a small star, but you see a shadow that suggests a giant planet, something is wrong. Knowing about the star helps the AI check if the story adds up.
+    - *What they are:* Knowing details about the star itself (Is it big? Is it hot?).
+    - *Why they matter:* If you know you're looking at a small star, but you see a shadow that suggests a giant planet, something is wrong. Knowing about the star helps the AI check if the story adds up.
 
     ### Available Tools:
-    - **Light Curve Analysis**: Upload a FITS file and use a deep learning (CNN) model to detect transit signals.
-    - **Tabular Model Analysis**: Input stellar and transit parameters or CSV file to get a prediction from a powerful XGBoost model.
-    - **FITS Viewer**: A utility to inspect the contents of any FITS file.
-    - **Admin Tools**: A protected area for managing the AI models.
+    - *Light Curve Analysis*: Upload a FITS file and use a deep learning (CNN) model to detect transit signals.
+    - *Tabular Model Analysis*: Input stellar and transit parameters or CSV file to get a prediction from a powerful XGBoost model.
+    - *FITS Viewer*: A utility to inspect the contents of any FITS file.
+    - *Admin Tools*: A protected area for managing the AI models.
     """
 )
 
@@ -314,24 +764,24 @@ st.header("Software Architecture & Data Flow")
 flowchart_html = """
 <div class="flowchart-container">
     <div id="layer-1" class="flowchart-layer">
-        <div class="flowchart-node">☁️ Cloud Storage & APIs</div>
-        <div class="flowchart-node">🗃️ FITS Files & Databases</div>
+        <div class="flowchart-node">☁ Cloud Storage & APIs</div>
+        <div class="flowchart-node">🗃 FITS Files & Databases</div>
     </div>
-    <div id="arrow-1" class="flowchart-arrow">⬇️</div>
+    <div id="arrow-1" class="flowchart-arrow">⬇</div>
     <div id="layer-2" class="flowchart-layer">
         <div class="flowchart-node">🧹 Data Preprocessing</div>
         <div class="flowchart-node ai-core">🧠 AI CORE (CNN & XGBoost Models)</div>
         <div class="flowchart-node">📈 Predictive Analytics</div>
     </div>
-    <div id="arrow-2" class="flowchart-arrow">⬇️</div>
+    <div id="arrow-2" class="flowchart-arrow">⬇</div>
     <div id="layer-3" class="flowchart-layer">
         <div class="flowchart-node">📉 Light Curve Analysis</div>
         <div class="flowchart-node">📊 Tabular Model Analysis</div>
         <div class="flowchart-node">🔭 FITS Viewer</div>
     </div>
-    <div id="arrow-3" class="flowchart-arrow">⬇️</div>
+    <div id="arrow-3" class="flowchart-arrow">⬇</div>
     <div id="layer-4" class="flowchart-layer">
-        <div class="flowchart-node">🖥️ Professional User Interface</div>
+        <div class="flowchart-node">🖥 Professional User Interface</div>
     </div>
 </div>
 """
