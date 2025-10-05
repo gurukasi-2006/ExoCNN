@@ -73,7 +73,7 @@ def load_custom_styling():
     """, unsafe_allow_html=True)
 
 
-# --- tsParticles Animated Background ---
+# --- Particles Animated Background ---
 def animated_background():
     """Injects HTML/CSS/JS for a full-screen, animated starfield."""
     st.components.v1.html("""
@@ -134,7 +134,7 @@ def animated_background():
     """, height=0)
 
 
-# --- Live Data Fetching Functions (Unchanged) ---
+# --- Live Data Fetching Functions ---
 @st.cache_data(ttl=3600)
 def get_live_exoplanet_count():
     try:
@@ -155,14 +155,14 @@ load_custom_styling()
 animated_background()
 
 st.title("🌌 EXOHUNTERS")
-st.subheader("An AI-Powered Exoplanet Analysis Suite")
+st.subheader("An Hybrid AI-Powered Exoplanet Analysis Interface")
 
 st.markdown("---")
 
 st.header("Live Observatory Data")
 col1, col2, col3 = st.columns(3)
 
-# --- UPDATED: All three dashboard items now use the same animated style ---
+# --- Live exoplanet count and Time ---
 with col1:
     live_count = get_live_exoplanet_count()
     st.markdown(f"""
@@ -181,7 +181,7 @@ st.markdown("---")
 st.header("About This Application")
 st.markdown(
     """
-    This is a professional interface for a suite of AI models designed to detect
+    This is a professional interface for a Hybrid Model designed to detect
     exoplanets from astrophysical data. Use the navigation sidebar to access the analysis tools.
 
     ### Available Tools:
@@ -212,4 +212,5 @@ while True:
     
 
     time.sleep(1)
+
 
