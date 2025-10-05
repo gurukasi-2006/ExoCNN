@@ -21,6 +21,7 @@ Tabular Model Analysis:
 
           > We can use this page to Upload Either CSV files or We can manually input each parameters to get the predictions
           > In batch analysis we can Upload Multiple csv files for predictions
+          > Admin & Model management Window password : 2030
           > in the Admin & Model management Window We can replace the Default model with other AI model(.pkl Extension is preferred)
           > We can retrain the model using Labeled data in this window
           > We can reset to Default Model config Anytime we want
