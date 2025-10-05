@@ -178,9 +178,31 @@ if page == "Analysis":
             
 
             st.header("Visualizations")
-            plot_tabs = st.tabs(["Folded Light Curve", "Periodogram", "Processed Light Curve", "Raw Light Curve"])
-
+            plot_tabs = st.tabs(["Raw Light Curve", "Processed Light Curve", "Periodogram", "Folded Light Curve"])
             with plot_tabs[0]:
+                st.subheader("Raw Light Curve")
+                with st.spinner("Generating raw light curve..."):
+                    fig_raw = px.line(x=lc_raw.time.value, y=lc_raw.flux.value, title="Raw Light Curve from FITS File")
+                    st.plotly_chart(fig_raw, use_container_width=True)
+                    
+            with plot_tabs[1]:
+                st.subheader("Processed (Normalized) Light Curve")
+                with st.spinner("Generating processed light curve..."):
+                    fig_processed = px.line(x=lc_flat.time.value, y=lc_flat.flux.value, title="Normalized Light Curve")
+                    st.plotly_chart(fig_processed, use_container_width=True)
+
+            with plot_tabs[2]:
+                st.subheader("Periodogram (Signal Search)")
+                with st.spinner("Generating periodogram..."):
+                    try:
+                        periodogram = lc_flat.to_periodogram(method='bls')
+                        fig_periodogram = px.line(x=periodogram.period.value, y=periodogram.power.value, title="Box-Least-Squares (BLS) Periodogram")
+                        st.plotly_chart(fig_periodogram, use_container_width=True)
+                    except Exception as e:
+                        st.warning(f"Could not generate a periodogram: {e}")
+           
+            
+            with plot_tabs[3]:
                 st.subheader("Folded Light Curve (at highest power)")
                 with st.spinner("Searching for periodic signals and folding light curve..."):
                     try:
@@ -199,28 +221,7 @@ if page == "Analysis":
                     except Exception as e:
                         # This warning will appear if the above fails
                         st.warning(f"Could not generate a folded light curve. This usually means no strong periodic signal was found in the data.")
-
-            with plot_tabs[1]:
-                st.subheader("Periodogram (Signal Search)")
-                with st.spinner("Generating periodogram..."):
-                    try:
-                        periodogram = lc_flat.to_periodogram(method='bls')
-                        fig_periodogram = px.line(x=periodogram.period.value, y=periodogram.power.value, title="Box-Least-Squares (BLS) Periodogram")
-                        st.plotly_chart(fig_periodogram, use_container_width=True)
-                    except Exception as e:
-                        st.warning(f"Could not generate a periodogram: {e}")
-           
-            with plot_tabs[2]:
-                st.subheader("Processed (Normalized) Light Curve")
-                with st.spinner("Generating processed light curve..."):
-                    fig_processed = px.line(x=lc_flat.time.value, y=lc_flat.flux.value, title="Normalized Light Curve")
-                    st.plotly_chart(fig_processed, use_container_width=True)
-
-            with plot_tabs[3]:
-                st.subheader("Raw Light Curve")
-                with st.spinner("Generating raw light curve..."):
-                    fig_raw = px.line(x=lc_raw.time.value, y=lc_raw.flux.value, title="Raw Light Curve from FITS File")
-                    st.plotly_chart(fig_raw, use_container_width=True)
+            
 
 # --- ADMIN VIEW ---
 elif page == "⚙️ Admin & Model Management":
@@ -272,3 +273,4 @@ elif page == "⚙️ Admin & Model Management":
             st.rerun()
 
             
+
