@@ -335,9 +335,9 @@ elif page == "⚙️ Admin & Model Management":
                 if st.button("Confirm and Reset Model"):
                     try:
                         artifacts_path = "Tabular_Model_Artifacts"
-                        shutil.copyfile(os.path.join(artifacts_path, "exoplanet_model_koi_original.pkl"), os.path.join(artifacts_path, "exoplanet_model_koi_final.pkl"))
-                        shutil.copyfile(os.path.join(artifacts_path, "scaler_original.pkl"), os.path.join(artifacts_path, "scaler_final.pkl"))
-                        shutil.copyfile(os.path.join(artifacts_path, "label_encoder_original.pkl"), os.path.join(artifacts_path, "label_encoder_final.pkl"))
+                        shutil.copyfile(os.path.join(artifacts_path, "exoplanet_model_koi_final_original.pkl"), os.path.join(artifacts_path, "exoplanet_model_koi_final.pkl"))
+                        shutil.copyfile(os.path.join(artifacts_path, "scaler_final_original.pkl"), os.path.join(artifacts_path, "scaler_final.pkl"))
+                        shutil.copyfile(os.path.join(artifacts_path, "label_encoder_final_original.pkl"), os.path.join(artifacts_path, "label_encoder_final.pkl"))
                         st.success("Model has been reset. Clearing cache and refreshing...")
                         st.cache_resource.clear()
                         time.sleep(2); st.rerun()
@@ -348,4 +348,5 @@ elif page == "⚙️ Admin & Model Management":
             st.session_state.authenticated = False
 
             st.rerun()
+
 
