@@ -10,7 +10,9 @@ import tempfile
 from astropy.io import fits
 import shutil
 import time
+from styling import add_advanced_loading_animation
 
+add_advanced_loading_animation()
 # --- Page Config and Background ---
 st.set_page_config(layout="wide")
 
@@ -273,4 +275,5 @@ elif page == "⚙️ Admin & Model Management":
             st.rerun()
 
             
+
 
