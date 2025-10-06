@@ -6,7 +6,9 @@ import matplotlib.pyplot as plt
 import plotly.express as px
 import lightkurve as lk
 import base64
+from styling import add_advanced_loading_animation
 
+add_advanced_loading_animation()
 # --- Page Config & Background ---
 st.set_page_config(layout="wide")
 
@@ -154,4 +156,5 @@ if uploaded_file is not None:
                     st.info("This HDU contains data that is not a standard image or table.")
 
     except Exception as e:
+
         st.error(f"An error occurred while reading the FITS file: {e}")
