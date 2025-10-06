@@ -732,6 +732,7 @@ st.markdown(
     """
     This is a professional interface for a suite of AI models designed to detect
     exoplanets from astrophysical data. Use the navigation sidebar to access the analysis tools.
+    ### Important Parameters to Know:
 
     ### Period (The Rhythm):
     - *What it is:* How often the light dims.
@@ -802,6 +803,7 @@ while True:
     """, unsafe_allow_html=True)
     
     time.sleep(1)
+
 
 
 
