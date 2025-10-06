@@ -8,6 +8,22 @@ import os
 import streamlit.components.v1 as components
 from styling import add_advanced_loading_animation
 
+
+# --- GOOGLE ANALYTICS TRACKING ---
+def inject_ga():
+    GA_ID = "G-CK7R7RTBNK"  
+
+    GA_SCRIPT = f"""
+        <script async src="https://www.googletagmanager.com/gtag/js?id={GA_ID}"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){{dataLayer.push(arguments);}}
+            gtag('js', new Date());
+            gtag('config', '{GA_ID}');
+        </script>
+    """
+    components.html(GA_SCRIPT, height=0)
+
 add_advanced_loading_animation()
 # --- Page Configuration ---
 st.set_page_config(
@@ -810,6 +826,7 @@ while True:
     """, unsafe_allow_html=True)
     
     time.sleep(1)
+
 
 
 
