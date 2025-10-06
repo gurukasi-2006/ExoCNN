@@ -6,7 +6,9 @@ from astropy.time import Time
 import base64
 import os
 import streamlit.components.v1 as components
+from styling import add_advanced_loading_animation
 
+add_advanced_loading_animation()
 # --- Page Configuration ---
 st.set_page_config(
     page_title="EXOHUNTERS",
@@ -803,6 +805,7 @@ while True:
     """, unsafe_allow_html=True)
     
     time.sleep(1)
+
 
 
 
