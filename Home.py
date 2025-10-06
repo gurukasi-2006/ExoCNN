@@ -727,7 +727,12 @@ st.components.v1.html("""
 </html>
 """, height=650)
 st.markdown("---")
-
+st.header("Real-World Light Curve Examples")
+st.image(
+    "photo-collage.jpg",
+    caption="Comparison of light curves. The top graph shows distinct, periodic dips characteristic of an exoplanet transit. The bottom graph displays stellar variability and noise without a clear transit signal."
+)
+st.markdown("---")
 
 st.header("About This Application")
 st.markdown(
@@ -805,6 +810,7 @@ while True:
     """, unsafe_allow_html=True)
     
     time.sleep(1)
+
 
 
 
