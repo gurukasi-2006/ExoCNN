@@ -230,7 +230,7 @@ elif page == "⚙️ Admin & Model Management":
         st.session_state.authenticated = False
     
     if not st.session_state.authenticated:
-        st.warning("This section is restricted. Please enter the password to unlock.")
+        st.warning("This section is restricted. Please enter the password to unlock.The Password is : 2030")
         password = st.text_input("Admin Password", type="password", key="lc_admin_password")
         if st.button("Unlock"):
             if password == "2030":
