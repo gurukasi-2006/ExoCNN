@@ -25,6 +25,7 @@ def inject_ga():
     components.html(GA_SCRIPT, height=0)
 
 add_advanced_loading_animation()
+inject_ga()
 # --- Page Configuration ---
 st.set_page_config(
     page_title="EXOHUNTERS",
@@ -826,6 +827,7 @@ while True:
     """, unsafe_allow_html=True)
     
     time.sleep(1)
+
 
 
 
