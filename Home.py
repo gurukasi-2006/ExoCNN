@@ -25,13 +25,14 @@ def inject_ga():
     components.html(GA_SCRIPT, height=0)
 
 add_advanced_loading_animation()
-inject_ga()
+
 # --- Page Configuration ---
 st.set_page_config(
     page_title="EXOHUNTERS",
     page_icon="🪐",
     layout="wide"
 )
+inject_ga()
 
 # --- Function to encode image to base64 ---
 def get_image_as_base64(path):
@@ -827,6 +828,7 @@ while True:
     """, unsafe_allow_html=True)
     
     time.sleep(1)
+
 
 
 
