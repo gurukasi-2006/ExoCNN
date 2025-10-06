@@ -13,7 +13,9 @@ from sklearn.metrics import accuracy_score
 import xgboost as xgb
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.utils import resample
+from styling import add_advanced_loading_animation
 
+add_advanced_loading_animation()
 # --- Page Configuration and Background ---
 st.set_page_config(layout="wide")
 
@@ -346,3 +348,4 @@ elif page == "⚙️ Admin & Model Management":
             st.session_state.authenticated = False
 
             st.rerun()
+
