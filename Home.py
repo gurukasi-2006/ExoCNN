@@ -33,6 +33,15 @@ st.set_page_config(
     layout="wide"
 )
 inject_ga()
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-CK7R7RTBNK"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-CK7R7RTBNK');
+</script>
 
 # --- Function to encode image to base64 ---
 def get_image_as_base64(path):
@@ -828,6 +837,7 @@ while True:
     """, unsafe_allow_html=True)
     
     time.sleep(1)
+
 
 
 
