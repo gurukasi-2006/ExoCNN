@@ -4,7 +4,7 @@ import os
 
 # --- Page Configuration ---
 st.set_page_config(
-    page_title="ExoCNN Features",
+    page_title="Project Features",
     page_icon="✨",
     layout="wide"
 )
@@ -73,6 +73,9 @@ feature_cards_html = """
     .feature-card:nth-child(2) { animation-delay: 0.2s; }
     .feature-card:nth-child(3) { animation-delay: 0.4s; }
     .feature-card:nth-child(4) { animation-delay: 0.6s; }
+    .feature-card:nth-child(5) { animation-delay: 0.8s; } /* New Card Delay */
+    .feature-card:nth-child(6) { animation-delay: 1.0s; } /* New Card Delay */
+
 
     .feature-icon {
         flex: 0 0 120px;
@@ -97,10 +100,7 @@ feature_cards_html = """
     /* --- Custom Animations --- */
 
     /* Home Page Animation */
-    .home-anim-icon {
-        font-size: 70px;
-        animation: pulse 2s infinite ease-in-out;
-    }
+    .home-anim-icon { font-size: 70px; animation: pulse 2s infinite ease-in-out; }
     @keyframes pulse {
         0% { transform: scale(0.95); text-shadow: 0 0 5px #87CEEB; }
         70% { transform: scale(1.1); text-shadow: 0 0 25px #87CEEB; }
@@ -108,20 +108,8 @@ feature_cards_html = """
     }
 
     /* CNN Animation */
-    .cnn-anim-icon {
-        width: 100px;
-        height: 50px;
-        position: relative;
-    }
-    .cnn-layer {
-        position: absolute;
-        width: 15px;
-        height: 50px;
-        background: #4a90e2;
-        border: 1px solid #fff;
-        border-radius: 3px;
-        animation: cnn-process 3s infinite;
-    }
+    .cnn-anim-icon { width: 100px; height: 50px; position: relative; }
+    .cnn-layer { position: absolute; width: 15px; height: 50px; background: #4a90e2; border: 1px solid #fff; border-radius: 3px; animation: cnn-process 3s infinite; }
     .cnn-layer:nth-child(1) { left: 0; }
     .cnn-layer:nth-child(2) { left: 30px; animation-delay: 0.5s; }
     .cnn-layer:nth-child(3) { left: 60px; animation-delay: 1.0s; }
@@ -131,46 +119,35 @@ feature_cards_html = """
     }
 
     /* XGBoost Animation */
-    .xgb-anim-icon {
-        width: 80px;
-        height: 80px;
-        border: 2px solid #5ba0f2;
-        border-radius: 50%;
-        position: relative;
-    }
-    .xgb-dot {
-        width: 10px;
-        height: 10px;
-        background: #E6E6FA;
-        border-radius: 50%;
-        position: absolute;
-        transform-origin: 40px 40px;
-        animation: xgb-orbit 4s linear infinite;
-    }
+    .xgb-anim-icon { width: 80px; height: 80px; border: 2px solid #5ba0f2; border-radius: 50%; position: relative; }
+    .xgb-dot { width: 10px; height: 10px; background: #E6E6FA; border-radius: 50%; position: absolute; transform-origin: 40px 40px; animation: xgb-orbit 4s linear infinite; }
     .xgb-dot:nth-child(1) { animation-delay: 0s; }
     .xgb-dot:nth-child(2) { animation: xgb-orbit-2 3s linear infinite; background: #FFD700; }
     @keyframes xgb-orbit { from { transform: rotate(0deg) translateX(35px); } to { transform: rotate(360deg) translateX(35px); } }
     @keyframes xgb-orbit-2 { from { transform: rotate(0deg) translateX(20px); } to { transform: rotate(-360deg) translateX(20px); } }
 
     /* FITS Viewer Animation */
-    .fits-anim-icon {
-        width: 90px;
-        height: 60px;
-        border: 1px solid #8b949e;
-        background: #0d1117;
-        position: relative;
-        overflow: hidden;
-    }
-    .fits-scanline {
-        width: 100%;
-        height: 3px;
-        background: #58a6ff;
-        box-shadow: 0 0 10px #58a6ff;
-        position: absolute;
-        top: 0;
-        animation: scan 3s linear infinite;
-    }
+    .fits-anim-icon { width: 90px; height: 60px; border: 1px solid #8b949e; background: #0d1117; position: relative; overflow: hidden; }
+    .fits-scanline { width: 100%; height: 3px; background: #58a6ff; box-shadow: 0 0 10px #58a6ff; position: absolute; top: 0; animation: scan 3s linear infinite; }
     @keyframes scan { from { top: 0; } to { top: 100%; } }
+
+    /* NEW: Hyperparameter Tuning Animation */
+    .tuning-anim-icon { width: 100px; height: 60px; position: relative; }
+    .slider { position: absolute; width: 100%; height: 5px; background: #2a3e5f; border-radius: 3px; top: 50%; }
+    .thumb { position: absolute; width: 15px; height: 15px; background: white; border-radius: 50%; top: -5px; animation: slide 4s infinite ease-in-out; }
+    .thumb.t1 { animation-delay: 0s; }
+    .thumb.t2 { top: 15px; animation-delay: 0.2s; }
+    .thumb.t3 { top: 35px; animation-delay: 0.4s; }
+    @keyframes slide {
+        0%, 100% { left: 0%; } 50% { left: 85%; background: #00FF00; box-shadow: 0 0 10px #00FF00; }
+    }
+
+    /* NEW: AI/ML Basics Animation */
+    .ai-anim-icon { font-size: 70px; color: #87CEEB; animation: brain-glow 2.5s infinite alternate; }
+    @keyframes brain-glow {
+        from { text-shadow: 0 0 5px #87CEEB, 0 0 10px #87CEEB; }
+        to { text-shadow: 0 0 20px #fff, 0 0 35px #fff; }
+    }
 
 </style>
 
@@ -243,7 +220,39 @@ feature_cards_html = """
     </div>
 </div>
 
-"""
+<div class="feature-card">
+    <div class="feature-icon">
+        <div class="tuning-anim-icon">
+            <div class="slider"><div class="thumb t1"></div></div>
+            <div class="slider" style="top: 20px;"><div class="thumb t2"></div></div>
+            <div class="slider" style="top: 40px;"><div class="thumb t3"></div></div>
+        </div>
+    </div>
+    <div class="feature-description">
+        <h2>Admin: Hyperparameter Tuning</h2>
+        <p>The Admin Panel includes a powerful feature for re-training the XGBoost model. Users can interactively define the search space for key hyperparameters to find a more optimal model configuration.</p>
+        <ul>
+            <li><b>Interactive Search:</b> Set ranges and values for parameters like `n_estimators` and `max_depth` for a `RandomizedSearchCV`.</li>
+            - <li><b>Automated Evaluation:</b> The system trains a new model on uploaded data and compares its accuracy against the current champion model.</li>
+            - <li><b>Self-Improving System:</b> If the new model performs better, it automatically replaces the old one, ensuring the tool evolves and improves over time.</li>
+        </ul>
+    </div>
+</div>
 
+<div class="feature-card">
+    <div class="feature-icon">
+        <div class="ai-anim-icon">🧠</div>
+    </div>
+    <div class="feature-description">
+        <h2>What are AI and ML?</h2>
+        <p>This project is built on the principles of Artificial Intelligence (AI) and Machine Learning (ML).</p>
+        <ul>
+            <li><b>Artificial Intelligence (AI):</b> The broad science of making machines that can perform tasks that typically require human intelligence, like visual perception or decision-making.</li>
+            - <li><b>Machine Learning (ML):</b> A subset of AI where we don't program explicit rules. Instead, we provide a model with large amounts of data, and it 'learns' the patterns itself. This is how our models learned to distinguish a planet's signal from random noise.</li>
+        </ul>
+    </div>
+</div>
+
+"""
 
 st.markdown(feature_cards_html, unsafe_allow_html=True)
