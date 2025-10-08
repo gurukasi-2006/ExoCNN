@@ -73,8 +73,8 @@ feature_cards_html = """
     .feature-card:nth-child(2) { animation-delay: 0.2s; }
     .feature-card:nth-child(3) { animation-delay: 0.4s; }
     .feature-card:nth-child(4) { animation-delay: 0.6s; }
-    .feature-card:nth-child(5) { animation-delay: 0.8s; } /* New Card Delay */
-    .feature-card:nth-child(6) { animation-delay: 1.0s; } /* New Card Delay */
+    .feature-card:nth-child(5) { animation-delay: 0.8s; }
+    .feature-card:nth-child(6) { animation-delay: 1.0s; }
 
 
     .feature-icon {
@@ -132,17 +132,39 @@ feature_cards_html = """
     @keyframes scan { from { top: 0; } to { top: 100%; } }
 
     /* NEW: Hyperparameter Tuning Animation */
-    .tuning-anim-icon { width: 100px; height: 60px; position: relative; }
-    .slider { position: absolute; width: 100%; height: 5px; background: #2a3e5f; border-radius: 3px; top: 50%; }
-    .thumb { position: absolute; width: 15px; height: 15px; background: white; border-radius: 50%; top: -5px; animation: slide 4s infinite ease-in-out; }
-    .thumb.t1 { animation-delay: 0s; }
-    .thumb.t2 { top: 15px; animation-delay: 0.2s; }
-    .thumb.t3 { top: 35px; animation-delay: 0.4s; }
-    @keyframes slide {
-        0%, 100% { left: 0%; } 50% { left: 85%; background: #00FF00; box-shadow: 0 0 10px #00FF00; }
+    .tuning-anim-icon {
+        width: 100px;
+        height: 60px;
+        position: relative;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+    }
+    .dial {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        border: 2px solid #5ba0f2;
+        position: relative;
+        animation: rotate-dial 4s linear infinite;
+    }
+    .dial::after {
+        content: '';
+        position: absolute;
+        width: 2px;
+        height: 10px;
+        background: #FFD700;
+        top: 2px;
+        left: 14px;
+    }
+    .dial.d2 { animation-duration: 3s; animation-direction: reverse; }
+    .dial.d3 { animation-duration: 5s; }
+    @keyframes rotate-dial {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
     }
 
-    /* NEW: AI/ML Basics Animation */
+    /* AI/ML Basics Animation */
     .ai-anim-icon { font-size: 70px; color: #87CEEB; animation: brain-glow 2.5s infinite alternate; }
     @keyframes brain-glow {
         from { text-shadow: 0 0 5px #87CEEB, 0 0 10px #87CEEB; }
@@ -223,9 +245,9 @@ feature_cards_html = """
 <div class="feature-card">
     <div class="feature-icon">
         <div class="tuning-anim-icon">
-            <div class="slider"><div class="thumb t1"></div></div>
-            <div class="slider" style="top: 20px;"><div class="thumb t2"></div></div>
-            <div class="slider" style="top: 40px;"><div class="thumb t3"></div></div>
+            <div class="dial d1"></div>
+            <div class="dial d2"></div>
+            <div class="dial d3"></div>
         </div>
     </div>
     <div class="feature-description">
