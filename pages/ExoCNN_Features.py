@@ -252,7 +252,7 @@ feature_cards_html = """
     </div>
     <div class="feature-description">
         <h2>Admin: Hyperparameter Tuning</h2>
-        <p>The Admin Panel includes a powerful feature for re-training the XGBoost model. Users can interactively define the search space for key hyperparameters to find a more optimal model configuration.</p>
+        <p>The Admin Panel includes a powerful feature for re-training the XGBoost model and the PyTorch-CNN. Users can interactively define the search space for key hyperparameters to find a more optimal model configuration.</p>
         <ul>
             <li><b>Interactive Search:</b> Set ranges and values for parameters like `n_estimators` and `max_depth` for a `RandomizedSearchCV`.</li>
             - <li><b>Automated Evaluation:</b> The system trains a new model on uploaded data and compares its accuracy against the current champion model.</li>
@@ -278,3 +278,4 @@ feature_cards_html = """
 """
 
 st.markdown(feature_cards_html, unsafe_allow_html=True)
+
