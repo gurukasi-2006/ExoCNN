@@ -29,7 +29,7 @@ add_advanced_loading_animation()
 # --- Page Configuration ---
 st.set_page_config(
     page_title="EXOHUNTERS",
-    page_icon="🪐",
+    page_icon="⚒️",
     layout="wide"
 )
 inject_ga()
@@ -829,6 +829,7 @@ while True:
     """, unsafe_allow_html=True)
     
     time.sleep(1)
+
 
 
 
