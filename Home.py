@@ -829,17 +829,3 @@ while True:
     """, unsafe_allow_html=True)
     
     time.sleep(1)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
