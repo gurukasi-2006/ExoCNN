@@ -4,7 +4,7 @@ import os
 
 # --- Page Configuration ---
 st.set_page_config(
-    page_title="Project Features",
+    page_title="ExoCNN Features",
     page_icon="✨",
     layout="wide"
 )
@@ -244,5 +244,6 @@ feature_cards_html = """
 </div>
 
 """
+
 
 st.markdown(feature_cards_html, unsafe_allow_html=True)
