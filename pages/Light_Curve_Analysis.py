@@ -83,7 +83,7 @@ INPUT_SIZE = N_POINTS_BASE + (N_POINTS_BASE // 2)
 @st.cache_resource
 def load_artifacts():
     artifacts_path = "Light_Curve_Models_Artifacts"
-    model_path = os.path.join(artifacts_path, "best_exoplanet_model_V3.pt")
+    model_path = os.path.join(artifacts_path, "best_exoplanet_model_v4.pt")
     scaler_path = os.path.join(artifacts_path, "standard_scaler.pkl")
 
     try:
@@ -279,7 +279,7 @@ elif page == "⚙️ Admin & Model Management":
                     try:
                         artifacts_path = "Light_Curve_Models_Artifacts"
                         source_path = os.path.join(artifacts_path, "best_exoplanet_model_V3_original.pt")
-                        dest_path = os.path.join(artifacts_path, "best_exoplanet_model_V3.pt")
+                        dest_path = os.path.join(artifacts_path, "best_exoplanet_model_v4.pt")
                         shutil.copyfile(source_path, dest_path)
                         st.success("Light Curve model has been reset. Clearing cache and refreshing...")
                         st.cache_resource.clear()
@@ -291,5 +291,6 @@ elif page == "⚙️ Admin & Model Management":
         if st.button("Lock Admin Mode"):
             st.session_state.authenticated = False
             st.rerun()
+
 
 
