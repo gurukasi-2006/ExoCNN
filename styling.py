@@ -137,18 +137,18 @@ def add_advanced_loading_animation():
 
 # --- NEW FUNCTIONS ADDED BELOW ---
 
-def get_image_as_base64(path):
+def get_image_as_base64_back(path):
     """Gets the base64 string of an image file."""
     if not os.path.exists(path):
         return None
     with open(path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode()
 
-def load_custom_styling():
+def load_custom_styling_back():
     """Injects all custom CSS for the entire page in one block."""
     # Encode the local sidebar background to base64
     sidebar_bg_path = "sidebar_background.jpg"
-    sidebar_bg_base64 = get_image_as_base64(sidebar_bg_path)
+    sidebar_bg_base64 = get_image_as_base64_back(sidebar_bg_path)
 
     # If the image is not found, don't apply the background style
     if sidebar_bg_base64:
@@ -198,3 +198,4 @@ def load_custom_styling():
 
     </style>
     """, unsafe_allow_html=True)
+
