@@ -17,7 +17,7 @@ st.set_page_config(
 )
 
 # --- NASA Theme Background ---
-def set_nasa_bg(png_file='space_bg.jpg'):
+def set_nasa_bg(png_file='background.jpg'):
     try:
         with open(png_file, 'rb') as f:
             data = f.read()
@@ -98,4 +98,5 @@ try:
     st.image(img, use_container_width=True)
 except FileNotFoundError:
     st.warning("training_metrics_preview.png not found.")
+
 
