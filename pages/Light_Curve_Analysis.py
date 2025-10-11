@@ -24,7 +24,7 @@ def get_base64_of_bin_file(bin_file):
     try:
         with open(bin_file, 'rb') as f:
             data = f.read()
-        return base66.b64encode(data).decode()
+        return base64.b64encode(data).decode()
     except FileNotFoundError:
         return None
 
@@ -291,6 +291,7 @@ elif page == "⚙️ Admin & Model Management":
         if st.button("Lock Admin Mode"):
             st.session_state.authenticated = False
             st.rerun()
+
 
 
 
