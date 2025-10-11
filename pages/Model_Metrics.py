@@ -95,6 +95,7 @@ st.subheader("Preview Saved Training Graph")
 try:
     from PIL import Image
     img = Image.open("training_metrics_preview.png")
-    st.image(img, use_column_width=True)
+    st.image(img, use_container_width=True)
 except FileNotFoundError:
     st.warning("training_metrics_preview.png not found.")
+
