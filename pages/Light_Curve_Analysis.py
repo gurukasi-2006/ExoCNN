@@ -278,7 +278,7 @@ elif page == "⚙️ Admin & Model Management":
                 if st.button("Confirm and Reset Model"):
                     try:
                         artifacts_path = "Light_Curve_Models_Artifacts"
-                        source_path = os.path.join(artifacts_path, "best_exoplanet_model_V3_original.pt")
+                        source_path = os.path.join(artifacts_path, "best_exoplanet_model_v4_original.pt")
                         dest_path = os.path.join(artifacts_path, "best_exoplanet_model_v4.pt")
                         shutil.copyfile(source_path, dest_path)
                         st.success("Light Curve model has been reset. Clearing cache and refreshing...")
@@ -291,6 +291,7 @@ elif page == "⚙️ Admin & Model Management":
         if st.button("Lock Admin Mode"):
             st.session_state.authenticated = False
             st.rerun()
+
 
 
 
