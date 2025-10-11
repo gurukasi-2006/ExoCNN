@@ -1,5 +1,9 @@
 import streamlit as st
 import time
+import base64
+import os
+
+# --- Your Existing Loading Animation Function ---
 def add_advanced_loading_animation():
     """
     A more sophisticated loading animation with a progress bar effect.
@@ -129,5 +133,69 @@ def add_advanced_loading_animation():
         </div>
     </div>
     """
-    
     st.markdown(loading_html, unsafe_allow_html=True)
+
+# --- NEW FUNCTIONS ADDED BELOW ---
+
+def get_image_as_base64_back(path):
+    """Gets the base64 string of an image file."""
+    if not os.path.exists(path):
+        return None
+    with open(path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode()
+
+def load_custom_styling_back():
+    """Injects all custom CSS for the entire page in one block."""
+    # Encode the local sidebar background to base64
+    sidebar_bg_path = "sidebar_background.jpg"
+    sidebar_bg_base64 = get_image_as_base64_back(sidebar_bg_path)
+
+    # If the image is not found, don't apply the background style
+    if sidebar_bg_base64:
+        sidebar_style = f'''
+            [data-testid="stSidebar"] > div:first-child {{
+                background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url("data:image/jpeg;base64,{sidebar_bg_base64}");
+                background-position: center; 
+                background-repeat: no-repeat;
+                background-size: cover;
+            }}
+        '''
+    else:
+        sidebar_style = "" # No style if image is missing
+
+    st.markdown(f"""
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Roboto+Mono:wght@400;700&display=swap');
+
+        /* --- Sidebar Styling --- */
+        {sidebar_style}
+        [data-testid="stSidebar"] {{
+            border-right: 1px solid #2a3e5f;
+        }}
+        
+        /* --- General Background & App Styling --- */
+        .stApp {{
+            background: linear-gradient(180deg, #000428 0%, #000000 70%);
+        }}
+
+        /* --- Title and Header Fonts & Animations --- */
+        .custom-title h1 {{
+            font-family: 'Orbitron', sans-serif;
+            color: #87CEEB;
+            text-shadow: 0 0 15px #87CEEB;
+            animation: fadeIn 2s ease-in-out;
+            display: inline-block;
+            vertical-align: middle;
+        }}
+
+        h2, h3 {{ /* For st.header and st.subheader */
+            font-family: 'Orbitron', sans-serif;
+            color: #E6E6FA;
+            animation: fadeIn 2.5s ease-in-out;
+        }}
+        
+        /* --- (Add any other general styles here if needed) --- */
+
+    </style>
+    """, unsafe_allow_html=True)
+

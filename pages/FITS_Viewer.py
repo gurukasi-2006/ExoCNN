@@ -6,9 +6,11 @@ import matplotlib.pyplot as plt
 import plotly.express as px
 import lightkurve as lk
 import base64
-from styling import add_advanced_loading_animation
+from styling import add_advanced_loading_animation, load_custom_styling_back
+
 
 add_advanced_loading_animation()
+load_custom_styling_back()
 # --- Page Config & Background ---
 st.set_page_config(layout="wide")
 
@@ -158,3 +160,5 @@ if uploaded_file is not None:
     except Exception as e:
 
         st.error(f"An error occurred while reading the FITS file: {e}")
+
+

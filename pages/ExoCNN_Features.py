@@ -1,7 +1,11 @@
 import streamlit as st
 import base64
 import os
+from styling import add_advanced_loading_animation, load_custom_styling_back
 
+
+add_advanced_loading_animation()
+load_custom_styling_back()
 # --- Page Configuration ---
 st.set_page_config(
     page_title="Project Features",
@@ -278,5 +282,7 @@ feature_cards_html = """
 """
 
 st.markdown(feature_cards_html, unsafe_allow_html=True)
+
+
 
 
