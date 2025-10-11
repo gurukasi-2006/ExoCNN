@@ -1,10 +1,8 @@
 import streamlit as st
 import time
-
 def add_advanced_loading_animation():
     """
     A more sophisticated loading animation with a progress bar effect.
-
     """
     loading_html = """
     <style>
@@ -115,3 +113,21 @@ def add_advanced_loading_animation():
                 visibility: hidden;
             }
         }
+    </style>
+    
+    <div id="loading-overlay-advanced">
+        <div class="orbital-spinner">
+            <div class="orbit"></div>
+            <div class="orbit"></div>
+            <div class="orbit"></div>
+        </div>
+        <div class="progress-container">
+            <div class="progress-bar"></div>
+        </div>
+        <div class="loading-text-advanced">
+            INITIALIZING SYSTEM
+        </div>
+    </div>
+    """
+    
+    st.markdown(loading_html, unsafe_allow_html=True)
