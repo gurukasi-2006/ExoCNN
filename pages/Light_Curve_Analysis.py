@@ -13,8 +13,9 @@ import time
 import shutil
 from styling import add_advanced_loading_animation, load_custom_styling_back
 
-load_custom_styling_back()
+
 add_advanced_loading_animation()
+load_custom_styling_back()
 # --- Page Config & Styling ---
 st.set_page_config(layout="wide")
 
@@ -290,4 +291,5 @@ elif page == "⚙️ Admin & Model Management":
         if st.button("Lock Admin Mode"):
             st.session_state.authenticated = False
             st.rerun()
+
 
