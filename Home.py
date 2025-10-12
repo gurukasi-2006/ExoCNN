@@ -360,7 +360,7 @@ def get_astro_time():
 load_custom_styling()
 animated_background()
 
-# --- Logo and Title Display ---
+#Logo and Title Display
 logo_path = "exo_assets/exohunters_logo.png" # Corrected path
 logo_base64 = get_image_as_base64(logo_path)
 
@@ -828,5 +828,6 @@ while True:
     """, unsafe_allow_html=True)
     
     time.sleep(1)
+
 
 
