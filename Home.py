@@ -814,19 +814,22 @@ flowchart_html = """
 st.markdown(flowchart_html, unsafe_allow_html=True)
 
 #Live Clock Loop
-while True:
-    utc_time, julian_date = get_astro_time()
-    
-    utc_placeholder.markdown(f"""
-    <p class="clock-label">Universal Time (UTC)</p>
-    <p class="live-clock">{utc_time}</p>
-    """, unsafe_allow_html=True)
-    
-    jd_placeholder.markdown(f"""
-    <p class="clock-label">Julian Date (JD)</p>
-    <p class="live-clock">{julian_date}</p>
-    """, unsafe_allow_html=True)
-    
-    time.sleep(1)
+# Live Clock Loop - Use Streamlit's rerun instead of while True
+utc_time, julian_date = get_astro_time()
+
+utc_placeholder.markdown(f"""
+<p class="clock-label">Universal Time (UTC)</p>
+<p class="live-clock">{utc_time}</p>
+""", unsafe_allow_html=True)
+
+jd_placeholder.markdown(f"""
+<p class="clock-label">Julian Date (JD)</p>
+<p class="live-clock">{julian_date}</p>
+""", unsafe_allow_html=True)
+
+# Auto-refresh every second
+time.sleep(1)
+st.rerun()
+
 
 
