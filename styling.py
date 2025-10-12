@@ -129,17 +129,20 @@ def add_advanced_loading_animation():
     </div>
     
     <script>
-        // Check if this is the first load using sessionStorage flag
-        const hasLoadedBefore = sessionStorage.getItem('hasLoaded');
+        // Use a global variable to track if page has loaded before
+        if (typeof window.exoLoadingShown === 'undefined') {
+            window.exoLoadingShown = false;
+        }
         
-        if (hasLoadedBefore) {
-            // Already loaded once, hide immediately
-            document.getElementById('loading-overlay-advanced').style.display = 'none';
+        const overlay = document.getElementById('loading-overlay-advanced');
+        
+        if (window.exoLoadingShown) {
+            // Already shown once, hide immediately
+            overlay.style.display = 'none';
         } else {
             // First load - show animation
             let progress = 0;
             const progressBar = document.getElementById('progress-bar');
-            const overlay = document.getElementById('loading-overlay-advanced');
             
             // Update progress bar
             const progressInterval = setInterval(() => {
@@ -150,23 +153,15 @@ def add_advanced_loading_animation():
                 }
             }, 100);
             
-            // Hide loading screen when page is fully loaded
-            window.addEventListener('load', () => {
+            // Hide after 3 seconds (fixed timing for Streamlit)
+            setTimeout(() => {
                 clearInterval(progressInterval);
                 progressBar.style.width = '100%';
                 
                 setTimeout(() => {
                     overlay.classList.add('loaded');
-                    sessionStorage.setItem('hasLoaded', 'true');
+                    window.exoLoadingShown = true;
                 }, 300);
-            });
-            
-            // Fallback: hide after 3 seconds
-            setTimeout(() => {
-                clearInterval(progressInterval);
-                progressBar.style.width = '100%';
-                overlay.classList.add('loaded');
-                sessionStorage.setItem('hasLoaded', 'true');
             }, 3000);
         }
     </script>
@@ -235,6 +230,7 @@ def load_custom_styling_back():
 
     </style>
     """, unsafe_allow_html=True)
+
 
 
 
