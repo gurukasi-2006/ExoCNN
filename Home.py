@@ -47,7 +47,7 @@ def get_image_as_base64(path):
 def load_custom_styling():
     """Injects all custom CSS for the entire page in one block."""
     # Encode the local sidebar background to base64
-    sidebar_bg_path = "sidebar_background.jpg"
+    sidebar_bg_path = "exo_assets/sidebar_background.jpg"
     sidebar_bg_base64 = get_image_as_base64(sidebar_bg_path)
 
     st.markdown(f"""
@@ -360,8 +360,8 @@ def get_astro_time():
 load_custom_styling()
 animated_background()
 
-#Logo and Title Display
-logo_path = "exohunters_logo.png" 
+# --- Logo and Title Display ---
+logo_path = "exo_assets/exohunters_logo.png" # Corrected path
 logo_base64 = get_image_as_base64(logo_path)
 
 if logo_base64:
@@ -747,7 +747,7 @@ st.components.v1.html("""
 st.markdown("---")
 st.header("Real-World Light Curve Examples")
 st.image(
-    "photo-collage.jpg",
+    "exo_assets/photo-collage.jpg",
     caption="Comparison of light curves. The top graph shows distinct, periodic dips characteristic of an exoplanet transit. The bottom graph displays stellar variability and noise without a clear transit signal."
 )
 st.markdown("---")
@@ -828,4 +828,5 @@ while True:
     """, unsafe_allow_html=True)
     
     time.sleep(1)
+
 

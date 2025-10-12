@@ -146,8 +146,8 @@ def get_image_as_base64_back(path):
 
 def load_custom_styling_back():
     """Injects all custom CSS for the entire page in one block."""
-    # Encoding the local sidebar background to base64
-    sidebar_bg_path = "sidebar_background.jpg"
+    # Encode the local sidebar background to base64
+    sidebar_bg_path = "exo_assets/sidebar_background.jpg"
     sidebar_bg_base64 = get_image_as_base64_back(sidebar_bg_path)
 
     

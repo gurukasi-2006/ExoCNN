@@ -16,8 +16,8 @@ st.set_page_config(
     layout="wide"
 )
 
-#NASA Theme Background
-def set_nasa_bg(png_file='background.jpg'):
+# --- NASA Theme Background ---
+def set_nasa_bg(png_file='exo_assets/background.jpg'):
     try:
         with open(png_file, 'rb') as f:
             data = f.read()
@@ -44,7 +44,7 @@ st.markdown("---")
 
 # Loading metrics CSV
 try:
-    metrics_df = pd.read_csv("metrics_log.csv")
+    metrics_df = pd.read_csv("exo_assets/metrics_log.csv")
     st.success("Metrics loaded successfully ✅")
 except FileNotFoundError:
     st.error("metrics_log.csv not found. Please run training first.")
@@ -94,7 +94,7 @@ st.markdown("---")
 st.subheader("Preview Saved Training Graph")
 try:
     from PIL import Image
-    img = Image.open("training_metrics_preview.png")
+    img = Image.open("exo_assets/training_metrics_preview.png")
     st.image(img, use_container_width=True)
 except FileNotFoundError:
     st.warning("training_metrics_preview.png not found.")
