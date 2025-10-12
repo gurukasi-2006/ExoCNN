@@ -17,7 +17,7 @@ from styling import add_advanced_loading_animation, load_custom_styling_back
 
 add_advanced_loading_animation()
 load_custom_styling_back()
-# --- Page Configuration and Background ---
+#Page Configuration and Backgroun ---
 st.set_page_config(layout="wide")
 
 @st.cache_data
@@ -48,7 +48,7 @@ except Exception:
     st.sidebar.warning("Background image 'background.jpg' not found.")
 
 
-# --- Model and Artifact Loading ---
+# Model and Artifact Loading
 @st.cache_resource
 def load_artifacts():
     try:
@@ -64,7 +64,7 @@ def load_artifacts():
 
 model, le, scaler, explainer = load_artifacts()
 
-# --- Preprocessing and Helper Functions ---
+#Preprocessing and Helper Functions
 def preprocess_for_prediction(df, dataset_type):
     df = df.copy()
     column_map = {
@@ -105,7 +105,7 @@ def st_shap(plot, height=None):
     shap_html = f"<head>{shap.getjs()}</head><body>{plot.html()}</body>"
     st.components.v1.html(shap_html, height=height)
 
-# --- Sidebar ---
+# Sidebar
 st.sidebar.header("Model Performance")
 if 'champion_accuracy' not in st.session_state:
     try:
@@ -117,7 +117,7 @@ with st.sidebar.expander("Show Stats", expanded=True):
     st.write("**Model:** XGBoost Classifier")
     st.metric("Current Model Accuracy", f"{st.session_state.champion_accuracy:.4f}")
 
-# --- Main App UI ---
+# Main App UI
 st.title("🌌 Exoplanet Classification System")
 if model is None: st.stop()
 
@@ -253,11 +253,11 @@ elif page == "⚙️ Admin & Model Management":
                     if st.button("Confirm and Start Re-training"):
                         with st.spinner("Running full training pipeline... This may take several minutes."):
                             try:
-                                # This is the full, working training pipeline from your notebook
+                                
                                 st.info("Step 1/5: Preprocessing new data...")
-                                # We need a full preprocessing function for training here
+                                
                                 training_df = st.session_state.uploaded_data.copy()
-                                training_df = training_df.rename(columns={'koi_disposition': 'label'}) # Simple rename
+                                training_df = training_df.rename(columns={'koi_disposition': 'label'}) 
                                 training_df['label'] = training_df['label'].replace({'CONFIRMED': 1.0, 'FALSE POSITIVE': -1.0})
                                 training_df = training_df[training_df['label'].isin([1.0, -1.0])]
 
@@ -272,8 +272,7 @@ elif page == "⚙️ Admin & Model Management":
                                     fp_resampled = resample(fp, n_samples=n_samples, random_state=42)
                                     balanced_df = pd.concat([confirmed_resampled, fp_resampled])
 
-                                    # Placeholder for your full feature engineering
-                                    # In a real app, the full preprocess_for_prediction function would be called
+                                    
                                     X = balanced_df.drop('label', axis=1)
                                     y = balanced_df['label']
                                     
@@ -349,6 +348,7 @@ elif page == "⚙️ Admin & Model Management":
             st.session_state.authenticated = False
 
             st.rerun()
+
 
 
 
