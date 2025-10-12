@@ -129,36 +129,46 @@ def add_advanced_loading_animation():
     </div>
     
     <script>
-        // Simulate progress based on page loading
-        let progress = 0;
-        const progressBar = document.getElementById('progress-bar');
-        const overlay = document.getElementById('loading-overlay-advanced');
+        // Check if this is the first load using sessionStorage flag
+        const hasLoadedBefore = sessionStorage.getItem('hasLoaded');
         
-        // Update progress bar
-        const progressInterval = setInterval(() => {
-            if (progress < 90) {
-                progress += Math.random() * 10;
-                progress = Math.min(progress, 90);
-                progressBar.style.width = progress + '%';
-            }
-        }, 200);
-        
-        // Hide loading screen when page is fully loaded
-        window.addEventListener('load', () => {
-            clearInterval(progressInterval);
-            progressBar.style.width = '100%';
+        if (hasLoadedBefore) {
+            // Already loaded once, hide immediately
+            document.getElementById('loading-overlay-advanced').style.display = 'none';
+        } else {
+            // First load - show animation
+            let progress = 0;
+            const progressBar = document.getElementById('progress-bar');
+            const overlay = document.getElementById('loading-overlay-advanced');
             
+            // Update progress bar
+            const progressInterval = setInterval(() => {
+                if (progress < 90) {
+                    progress += Math.random() * 10;
+                    progress = Math.min(progress, 90);
+                    progressBar.style.width = progress + '%';
+                }
+            }, 100);
+            
+            // Hide loading screen when page is fully loaded
+            window.addEventListener('load', () => {
+                clearInterval(progressInterval);
+                progressBar.style.width = '100%';
+                
+                setTimeout(() => {
+                    overlay.classList.add('loaded');
+                    sessionStorage.setItem('hasLoaded', 'true');
+                }, 300);
+            });
+            
+            // Fallback: hide after 3 seconds
             setTimeout(() => {
+                clearInterval(progressInterval);
+                progressBar.style.width = '100%';
                 overlay.classList.add('loaded');
-            }, 300);
-        });
-        
-        // Fallback: hide after 10 seconds if page hasn't loaded
-        setTimeout(() => {
-            clearInterval(progressInterval);
-            progressBar.style.width = '100%';
-            overlay.classList.add('loaded');
-        }, 10000);
+                sessionStorage.setItem('hasLoaded', 'true');
+            }, 3000);
+        }
     </script>
     """
     st.markdown(loading_html, unsafe_allow_html=True)
@@ -225,6 +235,7 @@ def load_custom_styling_back():
 
     </style>
     """, unsafe_allow_html=True)
+
 
 
 
