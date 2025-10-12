@@ -3,7 +3,7 @@ import time
 import base64
 import os
 
-# --- Your Existing Loading Animation Function ---
+#Loading animation function
 def add_advanced_loading_animation():
     """
     A more sophisticated loading animation with a progress bar effect.
@@ -135,7 +135,7 @@ def add_advanced_loading_animation():
     """
     st.markdown(loading_html, unsafe_allow_html=True)
 
-# --- NEW FUNCTIONS ADDED BELOW ---
+
 
 def get_image_as_base64_back(path):
     """Gets the base64 string of an image file."""
@@ -146,11 +146,11 @@ def get_image_as_base64_back(path):
 
 def load_custom_styling_back():
     """Injects all custom CSS for the entire page in one block."""
-    # Encode the local sidebar background to base64
+    # Encoding the local sidebar background to base64
     sidebar_bg_path = "sidebar_background.jpg"
     sidebar_bg_base64 = get_image_as_base64_back(sidebar_bg_path)
 
-    # If the image is not found, don't apply the background style
+    
     if sidebar_bg_base64:
         sidebar_style = f'''
             [data-testid="stSidebar"] > div:first-child {{
@@ -161,7 +161,7 @@ def load_custom_styling_back():
             }}
         '''
     else:
-        sidebar_style = "" # No style if image is missing
+        sidebar_style = "" 
 
     st.markdown(f"""
     <style>
@@ -198,4 +198,5 @@ def load_custom_styling_back():
 
     </style>
     """, unsafe_allow_html=True)
+
 
