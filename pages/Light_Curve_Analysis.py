@@ -16,7 +16,7 @@ from styling import add_advanced_loading_animation, load_custom_styling_back
 
 add_advanced_loading_animation()
 load_custom_styling_back()
-# --- Page Config & Styling ---
+#Page Config & Styling
 st.set_page_config(layout="wide")
 
 @st.cache_data
@@ -46,7 +46,7 @@ try:
 except Exception:
     pass
 
-# --- PYTORCH MODEL DEFINITION ---
+#PYTORCH MODEL
 class ExoCNN(nn.Module):
     def __init__(self, input_size):
         super(ExoCNN, self).__init__()
@@ -76,7 +76,7 @@ class ExoCNN(nn.Module):
         x = self.sigmoid(self.fc2(x))
         return x
 
-# --- Artifact Loading ---
+# Artifact Loading
 N_POINTS_BASE = 1000
 INPUT_SIZE = N_POINTS_BASE + (N_POINTS_BASE // 2)
 
@@ -104,7 +104,7 @@ def load_artifacts():
 
 model, scaler = load_artifacts()
 
-# --- Preprocessing Function ---
+# Preprocessing Function
 def preprocess_fits_for_prediction(fits_file, n_points=1000):
     try:
         with fits.open(fits_file) as hdul:
@@ -134,7 +134,7 @@ def preprocess_fits_for_prediction(fits_file, n_points=1000):
             st.error("Not enough valid data points (< 100) in the FITS file.")
             return None, None, None
 
-        # --- CORRECTED PREPROCESSING LOGIC ---
+        # CORRECTED PREPROCESSING LOGIC
         # 1. Resample the raw flux
         idx = np.linspace(0, len(flux) - 1, n_points).astype(int)
         flux_resampled = flux[idx]
@@ -163,7 +163,7 @@ def preprocess_fits_for_prediction(fits_file, n_points=1000):
         st.error(f"Failed to process FITS file: {e}")
         return None, None, None
 
-# --- Main Page UI ---
+#Main Page UI
 st.title("📈 Light Curve Analysis")
 if model is None or scaler is None:
     st.stop()
@@ -176,7 +176,7 @@ page = st.radio(
 )
 st.markdown("---")
 
-# --- ANALYSIS VIEW ---
+# ANALYSIS VIEW
 if page == "Analysis":
     st.write("Upload a FITS file to analyze it with the `ExoCNN` deep learning model.")
     uploaded_fits = st.file_uploader("Upload or Drag and Drop your FITS file here", type=["fits", "fit"])
@@ -240,7 +240,7 @@ if page == "Analysis":
                     except Exception as e:
                         st.warning(f"Could not generate a folded light curve. This usually means no strong periodic signal was found in the data.")
 
-# --- ADMIN VIEW ---
+#  ADMIN VIEW
 elif page == "⚙️ Admin & Model Management":
     st.header("⚙️ Admin & Model Management")
     if 'authenticated' not in st.session_state:

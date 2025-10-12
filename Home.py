@@ -9,7 +9,7 @@ import streamlit.components.v1 as components
 from styling import add_advanced_loading_animation
 
 
-# --- GOOGLE ANALYTICS TRACKING ---
+# GOOGLE ANALYTICS TRACKING (Not Working)
 def inject_ga():
     GA_ID = "G-CK7R7RTBNK"  
 
@@ -26,7 +26,7 @@ def inject_ga():
 
 add_advanced_loading_animation()
 
-# --- Page Configuration ---
+#Page Config
 st.set_page_config(
     page_title="EXOHUNTERS",
     page_icon="🌌",
@@ -35,7 +35,7 @@ st.set_page_config(
 inject_ga()
 
 
-# --- Function to encode image to base64 ---
+# Function to encode image to base64
 def get_image_as_base64(path):
     """Gets the base64 string of an image file."""
     if not os.path.exists(path):
@@ -43,8 +43,7 @@ def get_image_as_base64(path):
     with open(path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode()
 
-# --- Enhanced Styling and Fonts (ALL CSS IS NOW CONSOLIDATED HERE) ---
-# --- Enhanced Styling and Fonts (ALL CSS IS NOW CONSOLIDATED HERE) ---
+#Enhanced Styling and Fonts
 def load_custom_styling():
     """Injects all custom CSS for the entire page in one block."""
     # Encode the local sidebar background to base64
@@ -280,7 +279,7 @@ def load_custom_styling():
     </style>
     """, unsafe_allow_html=True)
 
-# --- tsParticles Animated Background ---
+#tsParticles Animated Background
 def animated_background():
     """Injects HTML/CSS/JS for a full-screen, animated starfield."""
     st.components.v1.html("""
@@ -341,11 +340,11 @@ def animated_background():
     """, height=0)
 
 
-# --- Live Data Fetching Functions Non Live ---
+#Live Data Fetching Functions (Currently non live)
 @st.cache_data(ttl=3600)
 def get_live_exoplanet_count():
     try:
-        count = 6022
+        count = 6028
         return count
     except Exception:
         return 5641
@@ -357,7 +356,7 @@ def get_astro_time():
     julian_date = f"{now.jd:.5f}"
     return utc_time, julian_date
 
-# --- Main Page UI ---
+#Main Page UI 
 load_custom_styling()
 animated_background()
 
@@ -409,7 +408,7 @@ st.sidebar.markdown(
     """,
     unsafe_allow_html=True
 )
-# --- TRANSIT ANIMATION ---
+# TRANSIT ANIMATION
 st.header("The Transit Method: A Visual Explanation")
 st.components.v1.html("""
 <!DOCTYPE html>
@@ -784,7 +783,7 @@ st.markdown(
     """
 )
 
-# --- ANIMATED FLOWCHART (HTML ONLY, NO STYLE TAG) ---
+#ANIMATED FLOWCHART (HTML ONLY, NO STYLE TAG)
 st.markdown("---")
 st.header("Software Architecture & Data Flow")
 
@@ -814,7 +813,7 @@ flowchart_html = """
 """
 st.markdown(flowchart_html, unsafe_allow_html=True)
 
-# --- Live Clock Loop ---
+#Live Clock Loop
 while True:
     utc_time, julian_date = get_astro_time()
     

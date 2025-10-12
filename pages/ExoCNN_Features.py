@@ -6,14 +6,14 @@ from styling import add_advanced_loading_animation, load_custom_styling_back
 
 add_advanced_loading_animation()
 load_custom_styling_back()
-# --- Page Configuration ---
+#Page Config
 st.set_page_config(
     page_title="Project Features",
     page_icon="✨",
     layout="wide"
 )
 
-# --- Function to encode image to base64 ---
+#Function to encode image to base64
 @st.cache_data
 def get_base64_of_bin_file(bin_file):
     try:
@@ -23,7 +23,7 @@ def get_base64_of_bin_file(bin_file):
     except FileNotFoundError:
         return None
 
-# --- Function to set background ---
+#Function to set background
 def set_png_as_page_bg(png_file):
     bin_str = get_base64_of_bin_file(png_file)
     if bin_str:
@@ -42,12 +42,12 @@ try:
 except Exception:
     st.sidebar.warning("Background image not found.")
 
-# --- Title ---
-st.title("🚀 Project Features & Capabilities")
+#Title
+st.title("🚀 ExoCNN Features & Capabilities")
 st.markdown("---")
 
-# --- Animated Feature Cards ---
-# This single HTML block contains all the styles and structure for the feature cards.
+#Animated Feature Cards
+# single HTML block for all the styles and structure for the feature cards.
 feature_cards_html = """
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Roboto+Mono:wght@400;700&display=swap');

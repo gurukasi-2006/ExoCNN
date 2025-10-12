@@ -5,7 +5,7 @@ import seaborn as sns
 import base64
 from styling import add_advanced_loading_animation, load_custom_styling_back
 
-# --- Advanced loading + custom styling (from your existing utilities) ---
+#Advanced loading + custom styling
 add_advanced_loading_animation()
 load_custom_styling_back()
 
@@ -38,11 +38,11 @@ def set_nasa_bg(png_file='exo_assets/background.jpg'):
 
 set_nasa_bg()
 
-# --- Title ---
+# Title
 st.title("🚀 Training Metrics Visualizer")
 st.markdown("---")
 
-# --- Load metrics CSV ---
+# Loading metrics CSV
 try:
     metrics_df = pd.read_csv("exo_assets/metrics_log.csv")
     st.success("Metrics loaded successfully ✅")
@@ -50,10 +50,10 @@ except FileNotFoundError:
     st.error("metrics_log.csv not found. Please run training first.")
     st.stop()
 
-# --- Interactive Metric Selector ---
+#Interactive Metric Selector
 metric_option = st.selectbox("Choose metric to visualize:", ["Train Loss", "Val Loss", "Train Acc", "Val Acc", "All"])
 
-# --- Plotting ---
+#Plotting
 plt.style.use('dark_background')
 sns.set_palette("coolwarm")
 fig, ax = plt.subplots(figsize=(10,5))
@@ -79,7 +79,7 @@ ax.legend()
 ax.grid(alpha=0.3)
 st.pyplot(fig)
 
-# --- Summary Cards (NASA Style) ---
+#Summary Cards
 st.markdown("---")
 st.subheader("📊 Quick Stats")
 
@@ -89,7 +89,7 @@ col2.metric("Max Val Acc", f"{metrics_df['val_acc'].max()*100:.2f}%")
 col3.metric("Min Train Loss", f"{metrics_df['train_loss'].min():.4f}")
 col4.metric("Min Val Loss", f"{metrics_df['val_loss'].min():.4f}")
 
-# --- Optional: Preview saved plot ---
+
 st.markdown("---")
 st.subheader("Preview Saved Training Graph")
 try:

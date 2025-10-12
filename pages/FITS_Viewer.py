@@ -11,7 +11,7 @@ from styling import add_advanced_loading_animation, load_custom_styling_back
 
 add_advanced_loading_animation()
 load_custom_styling_back()
-# --- Page Config & Background ---
+#Page Config & Background
 st.set_page_config(layout="wide")
 
 @st.cache_data
@@ -40,7 +40,7 @@ except Exception:
     st.sidebar.warning("Background image 'background.jpg' not found.")
 
 
-# --- Main App ---
+#  Main App
 st.title("🔭 FITS File Viewer")
 st.write("Upload a FITS file to inspect its headers, data tables, images, and light curve plots.")
 
@@ -77,7 +77,7 @@ if uploaded_file is not None:
                     st.write(f"Displaying Image Data (Shape: {hdu.data.shape})")
                     col1, col2 = st.columns(2)
                     cmap = col1.selectbox("Color Map", plt.colormaps(), key=f"cmap_{selected_hdu_index}")
-                    # UPGRADED: More scaling options
+                   
                     scale = col2.selectbox("Image Scale", ["Linear", "Log", "Square Root"], key=f"scale_{selected_hdu_index}")
                     
                     image_data = hdu.data.astype(np.float32)
@@ -110,11 +110,11 @@ if uploaded_file is not None:
                         full_df = pd.DataFrame.from_records(hdu.data)
                         df = full_df[[time_col_found, flux_col_found]].dropna()
                         
-                        # Create a lightkurve object for analysis
+                        #lightkurve object for analysis
                         lc = lk.LightCurve(time=df[time_col_found], flux=df[flux_col_found])
                         lc_flat = lc.flatten()
                         
-                        # --- NEW: TABBED PLOT SUITE ---
+                        # TABBED PLOT SUITE
                         lc_tabs = st.tabs(["Folded Light Curve", "Periodogram", "Full Light Curve", "Raw Data Table"])
                         
                         with lc_tabs[0]:
