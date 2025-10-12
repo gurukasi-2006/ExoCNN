@@ -42,7 +42,7 @@ def set_png_as_page_bg(png_file):
         st.markdown(page_bg_img, unsafe_allow_html=True)
 
 try:
-    set_png_as_page_bg('background.jpg')
+    set_png_as_page_bg('exo_assets/background.jpg')
 except Exception:
     pass
 
@@ -291,6 +291,7 @@ elif page == "⚙️ Admin & Model Management":
         if st.button("Lock Admin Mode"):
             st.session_state.authenticated = False
             st.rerun()
+
 
 
 
