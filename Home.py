@@ -1,4 +1,4 @@
-oimport streamlit as st
+import streamlit as st
 from astroquery.ipac.nexsci.nasa_exoplanet_archive import NasaExoplanetArchive
 import pandas as pd
 import time
@@ -829,4 +829,5 @@ while True:
     """, unsafe_allow_html=True)
     
     time.sleep(1)
+
 
