@@ -6,7 +6,7 @@ import os
 #Loading animation function
 def add_advanced_loading_animation():
     """
-    A more sophisticated loading animation with a progress bar effect.
+    A sophisticated loading animation that stays until the page fully loads.
     """
     loading_html = """
     <style>
@@ -22,7 +22,12 @@ def add_advanced_loading_animation():
             justify-content: center;
             align-items: center;
             flex-direction: column;
-            animation: fadeOut 0.8s ease-in-out 3s forwards;
+            transition: opacity 0.8s ease-in-out, visibility 0.8s ease-in-out;
+        }
+        
+        #loading-overlay-advanced.loaded {
+            opacity: 0;
+            visibility: hidden;
         }
         
         /* Orbital Spinner */
@@ -75,9 +80,11 @@ def add_advanced_loading_animation():
             height: 100%;
             background: linear-gradient(90deg, #87CEEB, #4a90e2, #87CEEB);
             background-size: 200% 100%;
-            animation: progress 2.5s ease-in-out forwards, shimmer 1s linear infinite;
+            animation: shimmer 1s linear infinite;
             border-radius: 2px;
             box-shadow: 0 0 10px rgba(135, 206, 235, 0.5);
+            width: 0%;
+            transition: width 0.3s ease-out;
         }
         
         /* Loading Text */
@@ -96,11 +103,6 @@ def add_advanced_loading_animation():
             100% { transform: rotate(360deg); }
         }
         
-        @keyframes progress {
-            0% { width: 0%; }
-            100% { width: 100%; }
-        }
-        
         @keyframes shimmer {
             0% { background-position: 200% 0; }
             100% { background-position: -200% 0; }
@@ -109,13 +111,6 @@ def add_advanced_loading_animation():
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.6; }
-        }
-        
-        @keyframes fadeOut {
-            to {
-                opacity: 0;
-                visibility: hidden;
-            }
         }
     </style>
     
@@ -126,15 +121,47 @@ def add_advanced_loading_animation():
             <div class="orbit"></div>
         </div>
         <div class="progress-container">
-            <div class="progress-bar"></div>
+            <div class="progress-bar" id="progress-bar"></div>
         </div>
         <div class="loading-text-advanced">
             INITIALIZING SYSTEM
         </div>
     </div>
+    
+    <script>
+        // Simulate progress based on page loading
+        let progress = 0;
+        const progressBar = document.getElementById('progress-bar');
+        const overlay = document.getElementById('loading-overlay-advanced');
+        
+        // Update progress bar
+        const progressInterval = setInterval(() => {
+            if (progress < 90) {
+                progress += Math.random() * 10;
+                progress = Math.min(progress, 90);
+                progressBar.style.width = progress + '%';
+            }
+        }, 200);
+        
+        // Hide loading screen when page is fully loaded
+        window.addEventListener('load', () => {
+            clearInterval(progressInterval);
+            progressBar.style.width = '100%';
+            
+            setTimeout(() => {
+                overlay.classList.add('loaded');
+            }, 300);
+        });
+        
+        // Fallback: hide after 10 seconds if page hasn't loaded
+        setTimeout(() => {
+            clearInterval(progressInterval);
+            progressBar.style.width = '100%';
+            overlay.classList.add('loaded');
+        }, 10000);
+    </script>
     """
     st.markdown(loading_html, unsafe_allow_html=True)
-
 
 
 def get_image_as_base64_back(path):
@@ -198,5 +225,6 @@ def load_custom_styling_back():
 
     </style>
     """, unsafe_allow_html=True)
+
 
 
