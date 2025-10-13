@@ -27,6 +27,15 @@ Tabular Model Analysis:
           > in the Admin & Model management Window We can replace the Default model with other AI model(.pkl Extension is preferred)
           > We can retrain the model using Labeled data in this window
           > We can reset to Default Model config Anytime we want
+          
+Model Metrics:
+
+          > In this Page we can see the Model metrics and Parameters of the Exocnn Model
+          > With that Metrics we can Understand the model easily
+
+ExoCNN Features Page:
+
+          > This Page Tells about the Features and Capability of the Web application
 
 Used Astroquery,MAST,Exofop for Lightcurve FITS Files           
 Used NASA KOI,K2 and TESS datasets and Lightcurve FITS Files for training

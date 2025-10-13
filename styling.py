@@ -136,7 +136,6 @@ def add_advanced_loading_animation():
     st.markdown(loading_html, unsafe_allow_html=True)
 
 
-
 def get_image_as_base64_back(path):
     """Gets the base64 string of an image file."""
     if not os.path.exists(path):
@@ -198,5 +197,9 @@ def load_custom_styling_back():
 
     </style>
     """, unsafe_allow_html=True)
+
+
+
+
 
 
