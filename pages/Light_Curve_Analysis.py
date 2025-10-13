@@ -5,6 +5,7 @@ import numpy as np
 import lightkurve as lk
 import base64
 import plotly.express as px
+import plotly.graph_objects as go
 import os
 import joblib
 from scipy.fft import fft
@@ -76,6 +77,163 @@ class ExoCNN(nn.Module):
         x = self.sigmoid(self.fc2(x))
         return x
 
+# XAI Functions
+def compute_integrated_gradients(model, input_tensor, baseline=None, steps=50):
+    """
+    Compute Integrated Gradients for input attribution.
+    """
+    # Ensure input is 3D: [batch, channels, sequence_length]
+    if input_tensor.dim() == 4:
+        input_tensor = input_tensor.squeeze(0)  # Remove extra dimension
+    
+    if baseline is None:
+        baseline = torch.zeros_like(input_tensor)
+    
+    # Generate interpolated inputs between baseline and actual input
+    alphas = torch.linspace(0, 1, steps)
+    
+    # Compute gradients
+    gradients = []
+    for alpha in alphas:
+        interpolated_input = baseline + alpha * (input_tensor - baseline)
+        interpolated_input.requires_grad = True
+        
+        output = model(interpolated_input)
+        model.zero_grad()
+        output.backward()
+        
+        gradients.append(interpolated_input.grad.detach().clone())
+    
+    # Average gradients and multiply by input difference
+    avg_gradients = torch.stack(gradients).mean(dim=0)
+    integrated_grads = (input_tensor - baseline) * avg_gradients
+    
+    return integrated_grads.squeeze().cpu().numpy()
+
+def compute_gradient_saliency(model, input_tensor):
+    """
+    Compute simple gradient-based saliency map.
+    """
+    # Ensure input is 3D: [batch, channels, sequence_length]
+    if input_tensor.dim() == 4:
+        input_tensor = input_tensor.squeeze(0)
+    
+    input_tensor = input_tensor.clone()
+    input_tensor.requires_grad = True
+    output = model(input_tensor)
+    model.zero_grad()
+    output.backward()
+    
+    saliency = input_tensor.grad.abs().squeeze().cpu().numpy()
+    return saliency
+
+def compute_smoothgrad(model, input_tensor, noise_level=0.1, n_samples=50):
+    """
+    Compute SmoothGrad by averaging gradients of noisy inputs.
+    """
+    # Ensure input is 3D: [batch, channels, sequence_length]
+    if input_tensor.dim() == 4:
+        input_tensor = input_tensor.squeeze(0)
+    
+    saliency_maps = []
+    
+    for _ in range(n_samples):
+        # Add random noise
+        noise = torch.randn_like(input_tensor) * noise_level
+        noisy_input = input_tensor + noise
+        noisy_input = noisy_input.clone()
+        noisy_input.requires_grad = True
+        
+        # Compute gradient
+        output = model(noisy_input)
+        model.zero_grad()
+        output.backward()
+        
+        saliency_maps.append(noisy_input.grad.abs().cpu().numpy())
+    
+    # Average the saliency maps
+    smoothgrad = np.mean(saliency_maps, axis=0).squeeze()
+    return smoothgrad
+
+def get_feature_importance_scores(attributions, n_flux_points=1000):
+    """
+    Compute aggregated importance scores for flux and FFT features.
+    """
+    flux_importance = np.abs(attributions[:n_flux_points]).sum()
+    fft_importance = np.abs(attributions[n_flux_points:]).sum()
+    
+    total = flux_importance + fft_importance
+    flux_pct = (flux_importance / total * 100) if total > 0 else 0
+    fft_pct = (fft_importance / total * 100) if total > 0 else 0
+    
+    return flux_pct, fft_pct
+
+def create_attribution_plot(attributions, flux_normalized, n_flux_points=1000):
+    """
+    Create an interactive plot showing the light curve with attribution overlay.
+    """
+    # Extract flux attributions
+    flux_attributions = attributions[:n_flux_points]
+    
+    # Normalize attributions for visualization
+    attr_normalized = (flux_attributions - flux_attributions.min()) / (flux_attributions.max() - flux_attributions.min() + 1e-8)
+    
+    # Create figure with dual y-axes
+    fig = go.Figure()
+    
+    # Add flux line
+    fig.add_trace(go.Scatter(
+        y=flux_normalized,
+        mode='lines',
+        name='Normalized Flux',
+        line=dict(color='lightblue', width=2),
+        yaxis='y1'
+    ))
+    
+    # Add attribution heatmap overlay
+    fig.add_trace(go.Scatter(
+        y=attr_normalized,
+        mode='lines',
+        name='Feature Importance',
+        line=dict(color='red', width=2),
+        fill='tozeroy',
+        fillcolor='rgba(255, 0, 0, 0.3)',
+        yaxis='y2'
+    ))
+    
+    fig.update_layout(
+        title='Light Curve with Feature Attribution Overlay',
+        xaxis=dict(title='Time Step'),
+        yaxis=dict(title='Normalized Flux', side='left', color='lightblue'),
+        yaxis2=dict(title='Attribution Score', overlaying='y', side='right', color='red'),
+        hovermode='x unified',
+        height=500
+    )
+    
+    return fig
+
+def create_fft_attribution_plot(attributions, n_flux_points=1000):
+    """
+    Create a plot showing FFT feature attributions.
+    """
+    fft_attributions = attributions[n_flux_points:]
+    
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        y=np.abs(fft_attributions),
+        name='FFT Feature Importance',
+        marker=dict(color='purple')
+    ))
+    
+    fig.update_layout(
+        title='FFT Feature Importance',
+        xaxis=dict(title='Frequency Bin'),
+        yaxis=dict(title='Absolute Attribution'),
+        height=400
+    )
+    
+    return fig
+
 # Artifact Loading
 N_POINTS_BASE = 1000
 INPUT_SIZE = N_POINTS_BASE + (N_POINTS_BASE // 2)
@@ -125,14 +283,14 @@ def preprocess_fits_for_prediction(fits_file, n_points=1000):
 
         if flux is None:
             st.error("Could not find PDCSAP_FLUX or SAP_FLUX in FITS file.")
-            return None, None, None
+            return None, None, None, None
 
         lc_raw = lk.LightCurve(flux=flux).remove_nans()
         flux = lc_raw.flux.value
 
         if len(flux) < 100:
             st.error("Not enough valid data points (< 100) in the FITS file.")
-            return None, None, None
+            return None, None, None, None
 
         # CORRECTED PREPROCESSING LOGIC
         # 1. Resample the raw flux
@@ -157,14 +315,14 @@ def preprocess_fits_for_prediction(fits_file, n_points=1000):
         # For plotting, we can use the initially normalized curve
         lc_flat = lk.LightCurve(flux=flux_normalized) 
         
-        return lc_raw, lc_flat, final_tensor
+        return lc_raw, lc_flat, final_tensor, flux_normalized
 
     except Exception as e:
         st.error(f"Failed to process FITS file: {e}")
-        return None, None, None
+        return None, None, None, None
 
 #Main Page UI
-st.title("📈 Light Curve Analysis")
+st.title("📈 Light Curve Analysis with XAI")
 if model is None or scaler is None:
     st.stop()
 
@@ -182,7 +340,7 @@ if page == "Analysis":
     uploaded_fits = st.file_uploader("Upload or Drag and Drop your FITS file here", type=["fits", "fit"])
 
     if uploaded_fits is not None:
-        lc_raw, lc_flat, flux_tensor = preprocess_fits_for_prediction(uploaded_fits, n_points=N_POINTS_BASE)
+        lc_raw, lc_flat, flux_tensor, flux_normalized = preprocess_fits_for_prediction(uploaded_fits, n_points=N_POINTS_BASE)
         if flux_tensor is not None:
             with st.spinner("Running prediction..."):
                 with torch.no_grad():
@@ -203,12 +361,16 @@ if page == "Analysis":
 
             st.progress(confidence)
 
+
             st.header("Visualizations")
             plot_tabs = st.tabs(["Raw Light Curve", "Processed Light Curve", "Periodogram", "Folded Light Curve"])
             with plot_tabs[0]:
                 st.subheader("Raw Light Curve")
                 with st.spinner("Generating raw light curve..."):
-                    fig_raw = px.line(x=lc_raw.time.value, y=lc_raw.flux.value, title="Raw Light Curve from FITS File")
+                    # Fix endianness issue
+                    time_data = np.asarray(lc_raw.time.value, dtype=np.float64)
+                    flux_data = np.asarray(lc_raw.flux.value, dtype=np.float64)
+                    fig_raw = px.line(x=time_data, y=flux_data, title="Raw Light Curve from FITS File")
                     st.plotly_chart(fig_raw, use_container_width=True)
 
             with plot_tabs[1]:
@@ -240,6 +402,49 @@ if page == "Analysis":
                     except Exception as e:
                         st.warning(f"Could not generate a folded light curve. This usually means no strong periodic signal was found in the data.")
 
+            # XAI Section
+            st.header("🔍 Explainability Analysis (XAI)")
+            st.write("Understanding why the model made this prediction:")
+            
+            xai_method = st.selectbox(
+                "Select XAI Method:",
+                ["Integrated Gradients", "Gradient Saliency", "SmoothGrad"],
+                help="Different methods for explaining model predictions"
+            )
+            
+            with st.spinner(f"Computing {xai_method}..."):
+                if xai_method == "Integrated Gradients":
+                    attributions = compute_integrated_gradients(model, flux_tensor.clone())
+                elif xai_method == "Gradient Saliency":
+                    attributions = compute_gradient_saliency(model, flux_tensor.clone())
+                else:  # SmoothGrad
+                    attributions = compute_smoothgrad(model, flux_tensor.clone())
+                
+                # Compute feature importance
+                flux_pct, fft_pct = get_feature_importance_scores(attributions, N_POINTS_BASE)
+                
+                # Display feature importance
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.metric("Time Series Contribution", f"{flux_pct:.1f}%")
+                with col2:
+                    st.metric("Frequency Domain Contribution", f"{fft_pct:.1f}%")
+                
+                # Create attribution visualizations
+                st.subheader("Feature Attribution Visualization")
+                fig_attr = create_attribution_plot(attributions, flux_normalized, N_POINTS_BASE)
+                st.plotly_chart(fig_attr, use_container_width=True)
+                
+                st.info("🔴 **Red shaded areas** indicate regions of the light curve that had the highest influence on the model's decision.")
+                
+                # FFT attribution plot
+                with st.expander("📊 View Frequency Domain Attribution"):
+                    fig_fft_attr = create_fft_attribution_plot(attributions, N_POINTS_BASE)
+                    st.plotly_chart(fig_fft_attr, use_container_width=True)
+                    st.info("This shows which frequency components were most important for the prediction.")
+
+            
+
 #  ADMIN VIEW
 elif page == "⚙️ Admin & Model Management":
     st.header("⚙️ Admin & Model Management")
@@ -259,7 +464,7 @@ elif page == "⚙️ Admin & Model Management":
         st.success("Admin Mode Unlocked.")
 
         with st.expander("⬆️ Upload New Light Curve Model"):
-            st.write("Manually replace the current PyTorch model file (`best_exoplanet_model_V2.pt`).")
+            st.write("Manually replace the current PyTorch model file (`best_exoplanet_model_V4.pt`).")
             artifacts_path = "Light_Curve_Models_Artifacts"
             new_model_file = st.file_uploader("Upload best_exoplanet_model.pt", type=["pt"], key="lc_model_uploader")
             if new_model_file:
@@ -291,9 +496,3 @@ elif page == "⚙️ Admin & Model Management":
         if st.button("Lock Admin Mode"):
             st.session_state.authenticated = False
             st.rerun()
-
-
-
-
-
-
