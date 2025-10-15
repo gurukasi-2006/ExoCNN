@@ -14,6 +14,14 @@ import xgboost as xgb
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.utils import resample
 from styling import add_advanced_loading_animation, load_custom_styling_back
+from reportlab.lib.pagesizes import letter, A4
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image, PageBreak
+from reportlab.lib import colors
+from reportlab.lib.enums import TA_CENTER, TA_LEFT
+from io import BytesIO
+import matplotlib.pyplot as plt
 
 add_advanced_loading_animation()
 load_custom_styling_back()
@@ -104,6 +112,162 @@ def preprocess_for_prediction(df, dataset_type):
 def st_shap(plot, height=None):
     shap_html = f"<head>{shap.getjs()}</head><body>{plot.html()}</body>"
     st.components.v1.html(shap_html, height=height)
+
+def generate_pdf_report(input_params, prediction_result, confidence, shap_values, processed_df):
+    """Generate a PDF report for single target prediction"""
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=18)
+    
+    # Container for the 'Flowable' objects
+    elements = []
+    
+    # Define styles
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=24,
+        textColor=colors.HexColor('#1f77b4'),
+        spaceAfter=30,
+        alignment=TA_CENTER
+    )
+    heading_style = ParagraphStyle(
+        'CustomHeading',
+        parent=styles['Heading2'],
+        fontSize=14,
+        textColor=colors.HexColor('#2c3e50'),
+        spaceAfter=12,
+        spaceBefore=12
+    )
+    
+    # Title
+    elements.append(Paragraph("Exoplanet Classification Report", title_style))
+    elements.append(Spacer(1, 12))
+    
+    # Timestamp
+    from datetime import datetime
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    elements.append(Paragraph(f"<b>Report Generated:</b> {timestamp}", styles['Normal']))
+    elements.append(Spacer(1, 20))
+    
+    # Prediction Result Section
+    elements.append(Paragraph("Prediction Result", heading_style))
+    verdict_color = colors.green if prediction_result == "Confirmed Planet" else colors.red
+    result_data = [
+        ['Verdict:', prediction_result],
+        ['Confidence Score:', f'{confidence:.2%}'],
+        ['Model Accuracy:', f'{st.session_state.champion_accuracy:.4f}']
+    ]
+    result_table = Table(result_data, colWidths=[2*inch, 4*inch])
+    result_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#ecf0f1')),
+        ('TEXTCOLOR', (1, 0), (1, 0), verdict_color),
+        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 0), (-1, -1), 11),
+        ('FONTNAME', (1, 0), (1, 0), 'Helvetica-Bold'),
+        ('PADDING', (0, 0), (-1, -1), 8),
+        ('GRID', (0, 0), (-1, -1), 1, colors.grey)
+    ]))
+    elements.append(result_table)
+    elements.append(Spacer(1, 20))
+    
+    # Input Parameters Section
+    elements.append(Paragraph("Input Parameters", heading_style))
+    
+    # Transit & Orbital Properties
+    elements.append(Paragraph("<b>Transit & Orbital Properties</b>", styles['Heading3']))
+    transit_data = [
+        ['Parameter', 'Value', 'Unit'],
+        ['Orbital Period', f"{input_params['period']:.4f}", 'days'],
+        ['Transit Depth', f"{input_params['depth'] * 1_000_000:.1f}", 'ppm'],
+        ['Transit Duration', f"{input_params['duration']:.2f}", 'hours'],
+        ['Planet Radius', f"{input_params['prad']:.2f}", 'Earth Radii'],
+        ['Epoch', f"{input_params['epoch']:.4f}", 'BJD'],
+        ['Signal-to-Noise Ratio', f"{input_params['snr']:.2f}", '']
+    ]
+    transit_table = Table(transit_data, colWidths=[2*inch, 1.5*inch, 1.5*inch])
+    transit_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#3498db')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('ALIGN', (1, 1), (-1, -1), 'CENTER'),
+        ('PADDING', (0, 0), (-1, -1), 6),
+        ('GRID', (0, 0), (-1, -1), 1, colors.grey),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige)
+    ]))
+    elements.append(transit_table)
+    elements.append(Spacer(1, 15))
+    
+    # Stellar Properties
+    elements.append(Paragraph("<b>Stellar Properties</b>", styles['Heading3']))
+    stellar_data = [
+        ['Parameter', 'Value', 'Unit'],
+        ['Stellar Radius', f"{input_params['srad']:.2f}", 'Solar Radii'],
+        ['Effective Temperature', f"{input_params['teff']:.0f}", 'K'],
+        ['Stellar Mass', f"{input_params['smass']:.2f}", 'Solar Mass'],
+        ['Surface Gravity', f"{input_params['logg']:.2f}", 'log10(g)']
+    ]
+    stellar_table = Table(stellar_data, colWidths=[2*inch, 1.5*inch, 1.5*inch])
+    stellar_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#e74c3c')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('ALIGN', (1, 1), (-1, -1), 'CENTER'),
+        ('PADDING', (0, 0), (-1, -1), 6),
+        ('GRID', (0, 0), (-1, -1), 1, colors.grey),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige)
+    ]))
+    elements.append(stellar_table)
+    elements.append(Spacer(1, 20))
+    
+    # SHAP Plot Section
+    elements.append(PageBreak())
+    elements.append(Paragraph("Feature Importance Analysis (SHAP)", heading_style))
+    elements.append(Paragraph("The SHAP plot below shows how each feature contributed to the prediction:", styles['Normal']))
+    elements.append(Spacer(1, 12))
+    
+    # Generate SHAP waterfall plot
+    try:
+        fig, ax = plt.subplots(figsize=(10, 6))
+        shap.waterfall_plot(shap.Explanation(values=shap_values[0], 
+                                             base_values=explainer.expected_value,
+                                             data=processed_df.iloc[0],
+                                             feature_names=processed_df.columns.tolist()),
+                           max_display=10, show=False)
+        
+        # Save plot to buffer
+        img_buffer = BytesIO()
+        plt.tight_layout()
+        plt.savefig(img_buffer, format='png', dpi=150, bbox_inches='tight')
+        img_buffer.seek(0)
+        plt.close()
+        
+        # Add image to PDF
+        img = Image(img_buffer, width=6*inch, height=4*inch)
+        elements.append(img)
+    except Exception as e:
+        elements.append(Paragraph(f"<i>SHAP plot generation failed: {str(e)}</i>", styles['Italic']))
+    
+    elements.append(Spacer(1, 20))
+    
+    # Footer
+    elements.append(Spacer(1, 30))
+    footer_style = ParagraphStyle(
+        'Footer',
+        parent=styles['Normal'],
+        fontSize=8,
+        textColor=colors.grey,
+        alignment=TA_CENTER
+    )
+    elements.append(Paragraph("This report was generated by the ExoCNN-Tabular Analysis", footer_style))
+    elements.append(Paragraph("Powered by XGBoost and SHAP", footer_style))
+    
+    # Build PDF
+    doc.build(elements)
+    buffer.seek(0)
+    return buffer
 
 # Sidebar
 st.sidebar.header("Model Performance")
@@ -213,9 +377,56 @@ elif page == "Single Target Prediction":
             if verdict == "Confirmed Planet": st.success(f"**Verdict:** ✅ {verdict}")
             else: st.error(f"**Verdict:** ❌ {verdict}")
             st.progress(float(confidence), text=f"Confidence: {confidence:.2%}")
+            
+            # Store prediction results in session state for PDF generation
+            st.session_state.last_prediction = {
+                'input_params': raw_data,
+                'verdict': verdict,
+                'confidence': confidence,
+                'processed_df': processed_df
+            }
+            
             with st.expander("Show Prediction Explanation (SHAP Plot)"):
                 shap_values = explainer.shap_values(processed_df)
+                st.session_state.last_prediction['shap_values'] = shap_values
                 st_shap(shap.force_plot(explainer.expected_value, shap_values[0,:], processed_df.iloc[0,:]), 400)
+            
+            # PDF Download Button
+            st.markdown("---")
+            st.subheader("📄 Download Report")
+            
+            # Generate PDF automatically after prediction
+            try:
+                shap_values = st.session_state.last_prediction.get('shap_values')
+                if shap_values is None:
+                    shap_values = explainer.shap_values(processed_df)
+                    st.session_state.last_prediction['shap_values'] = shap_values
+                
+                with st.spinner("Preparing PDF report..."):
+                    pdf_buffer = generate_pdf_report(
+                        raw_data,
+                        verdict,
+                        confidence,
+                        shap_values,
+                        processed_df
+                    )
+                    
+                    pdf_data = pdf_buffer.getvalue()
+                
+                # Download button
+                st.download_button(
+                    label="📥 Download PDF Report",
+                    data=pdf_data,
+                    file_name=f"exoplanet_prediction_report_{time.strftime('%Y%m%d_%H%M%S')}.pdf",
+                    mime="application/pdf",
+                    type="primary",
+                    use_container_width=False
+                )
+                st.success("✅ PDF report is ready to download!")
+                
+            except Exception as e:
+                st.error(f"Failed to generate PDF: {e}")
+                    
         except Exception as e:
             st.error(f"Prediction failed: {e}")
 
@@ -348,9 +559,3 @@ elif page == "⚙️ Admin & Model Management":
             st.session_state.authenticated = False
 
             st.rerun()
-
-
-
-
-
-
