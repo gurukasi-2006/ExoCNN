@@ -12,3 +12,5 @@ shap
 xgboost
 scikit-learn
 seaborn
+reportlab
+
