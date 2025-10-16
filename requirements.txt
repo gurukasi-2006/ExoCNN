@@ -13,4 +13,6 @@ xgboost
 scikit-learn
 seaborn
 reportlab
+kaleido
+
 
