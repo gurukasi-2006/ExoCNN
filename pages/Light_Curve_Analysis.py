@@ -13,6 +13,15 @@ from astropy.io import fits
 import time
 import shutil
 from styling import add_advanced_loading_animation, load_custom_styling_back
+from reportlab.lib.pagesizes import letter, A4
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, PageBreak, Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.lib import colors
+from reportlab.lib.enums import TA_CENTER, TA_LEFT
+from io import BytesIO
+from datetime import datetime
+import plotly.io as pio
 
 
 add_advanced_loading_animation()
@@ -234,6 +243,141 @@ def create_fft_attribution_plot(attributions, n_flux_points=1000):
     
     return fig
 
+def generate_pdf_report(filename, verdict, confidence, final_prob, flux_pct, fft_pct, 
+                       xai_method, best_period=None, figures_dict=None):
+    """
+    Generate a comprehensive PDF report of the light curve analysis.
+    Optimized for faster generation with reduced image quality for speed.
+    """
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=0.5*inch, bottomMargin=0.5*inch)
+    story = []
+    styles = getSampleStyleSheet()
+    
+    # Custom styles
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=24,
+        textColor=colors.HexColor('#1f77b4'),
+        spaceAfter=30,
+        alignment=TA_CENTER
+    )
+    
+    heading_style = ParagraphStyle(
+        'CustomHeading',
+        parent=styles['Heading2'],
+        fontSize=16,
+        textColor=colors.HexColor('#2c3e50'),
+        spaceAfter=12,
+        spaceBefore=12
+    )
+    
+    # Title
+    story.append(Paragraph("Exoplanet Light Curve Analysis Report", title_style))
+    story.append(Spacer(1, 0.2*inch))
+    
+    # Metadata
+    metadata_style = styles['Normal']
+    story.append(Paragraph(f"<b>Report Generated:</b> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", metadata_style))
+    story.append(Paragraph(f"<b>Analyzed File:</b> {filename}", metadata_style))
+    story.append(Spacer(1, 0.3*inch))
+    
+    # Executive Summary
+    story.append(Paragraph("Executive Summary", heading_style))
+    
+    # Results table
+    verdict_color = '#28a745' if verdict == "Confirmed EXO-Planet" else '#dc3545'
+    results_data = [
+        ['Analysis Result', 'Value'],
+        ['Verdict', verdict],
+        ['Model Confidence', f'{confidence:.2%}'],
+        ['Raw Prediction Score', f'{final_prob:.4f}'],
+    ]
+    
+    results_table = Table(results_data, colWidths=[3*inch, 3*inch])
+    results_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#34495e')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 12),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('FONTNAME', (0, 1), (0, -1), 'Helvetica-Bold'),
+    ]))
+    story.append(results_table)
+    story.append(Spacer(1, 0.3*inch))
+    
+    # XAI Analysis
+    story.append(Paragraph("Explainability Analysis (XAI)", heading_style))
+    story.append(Paragraph(f"<b>Method Used:</b> {xai_method}", styles['Normal']))
+    story.append(Spacer(1, 0.1*inch))
+    
+    xai_data = [
+        ['Feature Type', 'Contribution'],
+        ['Time Series Features', f'{flux_pct:.1f}%'],
+        ['Frequency Domain Features', f'{fft_pct:.1f}%'],
+    ]
+    
+    xai_table = Table(xai_data, colWidths=[3*inch, 3*inch])
+    xai_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#3498db')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 11),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.lightblue),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+    ]))
+    story.append(xai_table)
+    story.append(Spacer(1, 0.2*inch))
+    
+    if best_period:
+        story.append(Paragraph(f"<b>Best Period Detected:</b> {best_period:.4f} days", styles['Normal']))
+        story.append(Spacer(1, 0.2*inch))
+    
+    # Add page break before visualizations
+    story.append(PageBreak())
+    
+    # Visualizations section
+    story.append(Paragraph("Visualizations", heading_style))
+    story.append(Spacer(1, 0.2*inch))
+    
+    if figures_dict:
+        for title, fig in figures_dict.items():
+            story.append(Paragraph(title, styles['Heading3']))
+            story.append(Spacer(1, 0.1*inch))
+            
+            # Convert plotly figure to image with optimized settings for speed
+            # Reduced resolution and quality for faster generation
+            img_bytes = pio.to_image(fig, format='png', width=600, height=350, scale=1)
+            img_buffer = BytesIO(img_bytes)
+            img = Image(img_buffer, width=5.5*inch, height=3*inch)
+            story.append(img)
+            story.append(Spacer(1, 0.3*inch))
+    
+    # Footer
+    story.append(PageBreak())
+    story.append(Paragraph("Technical Notes", heading_style))
+    notes_text = """
+    This report was generated using the ExoCNN deep learning model for exoplanet detection.
+    The model analyzes both time-series flux data and frequency domain features (FFT) to make predictions.
+    Explainability methods (XAI) provide insights into which features influenced the model's decision.
+    """
+    story.append(Paragraph(notes_text, styles['Normal']))
+    story.append(Spacer(1, 0.2*inch))
+    story.append(Paragraph("<i>Generated by Light Curve Analysis System</i>", 
+                          ParagraphStyle('Footer', parent=styles['Normal'], 
+                                       fontSize=9, textColor=colors.grey, alignment=TA_CENTER)))
+    
+    # Build PDF
+    doc.build(story)
+    buffer.seek(0)
+    return buffer
+
 # Artifact Loading
 N_POINTS_BASE = 1000
 INPUT_SIZE = N_POINTS_BASE + (N_POINTS_BASE // 2)
@@ -442,6 +586,135 @@ if page == "Analysis":
                     fig_fft_attr = create_fft_attribution_plot(attributions, N_POINTS_BASE)
                     st.plotly_chart(fig_fft_attr, use_container_width=True)
                     st.info("This shows which frequency components were most important for the prediction.")
+
+            # PDF Report Generation Section - OPTIMIZED
+            st.markdown("---")
+            st.header("📄 Download Analysis Report")
+            
+            # Initialize generation state
+            if 'pdf_generating' not in st.session_state:
+                st.session_state['pdf_generating'] = False
+            
+            # Create columns for better layout
+            col_btn1, col_btn2 = st.columns([1, 3])
+            
+            with col_btn1:
+                generate_clicked = st.button("📥 Generate PDF Report", type="primary", key="gen_pdf_btn")
+            
+            if generate_clicked:
+                st.session_state['pdf_generating'] = True
+                st.session_state['pdf_buffer'] = None  # Clear old PDF
+            
+            # Show loading immediately when button is clicked
+            if st.session_state['pdf_generating']:
+                # Create placeholder for progress
+                progress_container = st.container()
+                
+                with progress_container:
+                    progress_bar = st.progress(0, text="🔄 Initializing PDF generation...")
+                    status_text = st.empty()
+                    
+                    try:
+                        # Step 1: Prepare data
+                        status_text.info("📊 Step 1/3: Collecting figures and data...")
+                        progress_bar.progress(10, text="📊 Collecting figures...")
+                        
+                        # Collect all figures
+                        figures_dict = {
+                            "Raw Light Curve": fig_raw,
+                            "Processed Light Curve": fig_processed,
+                            "Feature Attribution": fig_attr,
+                        }
+                        
+                        progress_bar.progress(20, text="📊 Processing periodogram...")
+                        
+                        # Add periodogram if available
+                        try:
+                            periodogram = lc_flat.to_periodogram(method='bls')
+                            fig_periodogram = px.line(
+                                x=periodogram.period.value, 
+                                y=periodogram.power.value, 
+                                title="Box-Least-Squares (BLS) Periodogram"
+                            )
+                            figures_dict["Periodogram"] = fig_periodogram
+                        except:
+                            pass
+                        
+                        progress_bar.progress(30, text="📊 Processing folded light curve...")
+                        
+                        # Add folded light curve if available
+                        best_period_val = None
+                        try:
+                            periodogram = lc_flat.to_periodogram(method='bls')
+                            best_period_val = periodogram.period_at_max_power.value
+                            folded_lc = lc_flat.fold(period=periodogram.period_at_max_power)
+                            fig_folded = px.scatter(
+                                x=folded_lc.time.value, 
+                                y=folded_lc.flux.value, 
+                                title=f"Light Curve Folded at Best Period"
+                            )
+                            figures_dict["Folded Light Curve"] = fig_folded
+                        except:
+                            pass
+                        
+                        # Step 2: Convert visualizations
+                        status_text.info("🖼️ Step 2/3: Converting visualizations to images...")
+                        progress_bar.progress(50, text="🖼️ Converting visualizations...")
+                        
+                        # Step 3: Build PDF
+                        status_text.info("📝 Step 3/3: Building PDF document...")
+                        progress_bar.progress(70, text="📝 Building PDF document...")
+                        
+                        pdf_buffer = generate_pdf_report(
+                            filename=uploaded_fits.name,
+                            verdict=verdict,
+                            confidence=confidence,
+                            final_prob=final_prob,
+                            flux_pct=flux_pct,
+                            fft_pct=fft_pct,
+                            xai_method=xai_method,
+                            best_period=best_period_val,
+                            figures_dict=figures_dict
+                        )
+                        
+                        # Finalize
+                        progress_bar.progress(100, text="✅ PDF generation complete!")
+                        status_text.success("✅ PDF Report generated successfully! Click below to download.")
+                        
+                        # Store PDF in session state
+                        st.session_state['pdf_buffer'] = pdf_buffer
+                        st.session_state['pdf_generating'] = False
+                        
+                        time.sleep(1)  # Brief pause to show success
+                        st.rerun()  # Refresh to show download button
+                        
+                    except Exception as e:
+                        progress_bar.empty()
+                        status_text.error(f"❌ PDF generation failed: {e}")
+                        st.info("💡 Note: Ensure required packages are installed: `pip install reportlab kaleido`")
+                        st.session_state['pdf_generating'] = False
+            
+            # Show download button if PDF is ready (only when not generating)
+            if 'pdf_buffer' in st.session_state and st.session_state['pdf_buffer'] is not None and not st.session_state.get('pdf_generating', False):
+                st.success("✅ Your PDF report is ready!")
+                
+                col_dl1, col_dl2 = st.columns([1, 3])
+                with col_dl1:
+                    st.download_button(
+                        label="💾 Download PDF Report",
+                        data=st.session_state['pdf_buffer'],
+                        file_name=f"exoplanet_analysis_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf",
+                        mime="application/pdf",
+                        type="secondary",
+                        on_click=lambda: st.session_state.update({'pdf_downloaded': True})
+                    )
+                
+                # Option to generate a new report
+                with col_dl2:
+                    if st.button("🔄 Generate New Report", key="new_report_btn"):
+                        st.session_state['pdf_buffer'] = None
+                        st.session_state['pdf_generating'] = False
+                        st.rerun()
 
             
 
