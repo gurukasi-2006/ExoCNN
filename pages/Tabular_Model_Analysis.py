@@ -8,6 +8,7 @@ import shap
 import plotly.express as px
 import os
 import shutil
+import json
 from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn.metrics import accuracy_score
 import xgboost as xgb
@@ -64,13 +65,61 @@ def load_artifacts():
         model = joblib.load(os.path.join(artifacts_path, "exoplanet_model_koi_final_original.pkl"))
         encoder = joblib.load(os.path.join(artifacts_path, "label_encoder_final_original.pkl"))
         scaler = joblib.load(os.path.join(artifacts_path, "scaler_final_original.pkl"))
-        explainer = shap.TreeExplainer(model)
-        return model, encoder, scaler, explainer
+        
+        # Don't create explainer here - we'll create it on-demand
+        return model, encoder, scaler, None
     except FileNotFoundError as e:
         st.error(f"CRITICAL ERROR: A required model file was not found: {e.filename}. Please place all .pkl files in the 'Tabular_Model_Artifacts' folder.")
         return None, None, None, None
+    except Exception as e:
+        st.error(f"ERROR loading model artifacts: {str(e)}")
+        import traceback
+        st.error(traceback.format_exc())
+        return None, None, None, None
 
-model, le, scaler, explainer = load_artifacts()
+def get_shap_explainer(model):
+    """Create SHAP explainer on-demand with fix for XGBoost base_score issue"""
+    try:
+        # Monkey patch to fix the bracketed base_score issue
+        import shap.explainers._tree as shap_tree
+        
+        original_init = shap_tree.XGBTreeModelLoader.__init__
+        
+        def patched_init(self, xgb_model):
+            self.model = xgb_model
+            booster = xgb_model.get_booster()
+            model_dump = booster.get_dump(dump_format="json")
+            learner_params = booster.save_config()
+            config = json.loads(learner_params)
+            
+            learner_model_param = config["learner"]["learner_model_param"]
+            
+            # Fix base_score if it's in bracketed format
+            base_score_str = learner_model_param["base_score"]
+            if base_score_str.startswith('[') and base_score_str.endswith(']'):
+                base_score_str = base_score_str.strip('[]')
+            
+            self.base_score = float(base_score_str)
+            self.num_features = int(learner_model_param["num_feature"])
+            
+            # Parse trees
+            self.trees = [json.loads(tree) for tree in model_dump]
+        
+        # Apply the patch
+        shap_tree.XGBTreeModelLoader.__init__ = patched_init
+        
+        # Now create the explainer
+        return shap.TreeExplainer(model)
+    except Exception as e:
+        st.error(f"Could not create SHAP explainer: {e}")
+        return None
+
+# Initialize model variables
+try:
+    model, le, scaler, explainer = load_artifacts()
+except Exception as e:
+    st.error(f"Failed to load model artifacts: {e}")
+    model, le, scaler, explainer = None, None, None, None
 
 #Preprocessing and Helper Functions
 def preprocess_for_prediction(df, dataset_type):
@@ -283,7 +332,9 @@ with st.sidebar.expander("Show Stats", expanded=True):
 
 # Main App UI
 st.title("🌌 Exoplanet Classification System")
-if model is None: st.stop()
+if model is None: 
+    st.error("Model could not be loaded. Please check the error messages above.")
+    st.stop()
 
 page = st.radio(
     "Choose an analysis tool:",
@@ -387,9 +438,14 @@ elif page == "Single Target Prediction":
             }
             
             with st.expander("Show Prediction Explanation (SHAP Plot)"):
-                shap_values = explainer.shap_values(processed_df)
-                st.session_state.last_prediction['shap_values'] = shap_values
-                st_shap(shap.force_plot(explainer.expected_value, shap_values[0,:], processed_df.iloc[0,:]), 400)
+                explainer = get_shap_explainer(model)
+                if explainer:
+                    shap_values = explainer.shap_values(processed_df)
+                    st.session_state.last_prediction['shap_values'] = shap_values
+                    st.session_state.last_prediction['explainer'] = explainer
+                    st_shap(shap.force_plot(explainer.expected_value, shap_values[0,:], processed_df.iloc[0,:]), 400)
+                else:
+                    st.error("SHAP explainer could not be created. Explanation not available.")
             
             # PDF Download Button
             st.markdown("---")
@@ -557,5 +613,4 @@ elif page == "⚙️ Admin & Model Management":
         
         if st.button("🔒 Lock Admin Mode"):
             st.session_state.authenticated = False
-
             st.rerun()
