@@ -43,3 +43,5 @@ Used NASA KOI,K2 and TESS datasets and Lightcurve FITS Files for training
 Repository and Website Created on 04-10-2025
 
 Coauthored by M.Gurukasi And S.Mugeshkumar.
+
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/gurukasi-2006/ExoCNN)
